@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+
+
+
+    "lib": [
+      "es2020",
+      "esnext",
+      "dom"
+    ],
+    "outDir": "./lib/esm",
+    "resolveJsonModule": true
+  },
+
+  "include": ["./src"]
+}
