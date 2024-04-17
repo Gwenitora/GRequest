@@ -1,4 +1,4 @@
-import { json } from "@gscript/gtools";
+import { json, typeExt } from "@gscript/gtools";
 import { req } from "../export";
 import { GRequest } from "../GRequest";
 
@@ -9,5 +9,5 @@ export abstract class Request extends GRequest  {
     abstract outTemplates : json.template[];
 
     abstract start(): boolean;
-    abstract run(body : json.type, template: number, ): Promise<{resBody: json.type, resCode: req.HTTPerror}>;
+    abstract run(template: number, body: json.type, header: json.type, linkVar: typeExt<json.type, {[key in string]: string}>): Promise<{resBody: json.type, resCode: req.HTTPerror}>;
 }
