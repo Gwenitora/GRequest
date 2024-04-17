@@ -1,7 +1,7 @@
 {
   "name": "@gscript/grequest",
-  "version": "1.1.0",
-  "description": "Tools for package create by Gwenitora",
+  "version": "1.0.0",
+  "description": "For easier request system",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "scripts": {
@@ -29,6 +29,7 @@
     "./lib/esm/"
   ],
   "dependencies": {
+    "@gscript/grequest": "^1.0.0",
     "@gscript/gtools": "^1.1.2"
   }
 }
