@@ -3,9 +3,9 @@ import { GRequest } from "../GRequest";
 import { getClasses } from "@gscript/gtools";
 
 export class reqManager extends GRequest {
-    private requests: Request[] = [];
+    private static requests: Request[] = [];
 
-    public init() {
-        this.requests = getClasses(Request);
+    public static init() {
+        reqManager.requests = getClasses(Request);
     }
 }
