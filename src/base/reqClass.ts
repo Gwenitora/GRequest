@@ -3,8 +3,6 @@ import { req } from "../export";
 import { GRequest } from "../GRequest";
 
 export abstract class Request extends GRequest  {
-    public get isGRequest(): true { return true; }
-
     abstract link : string;
     abstract type : req.type;
     abstract inTemplates : json.template[];
