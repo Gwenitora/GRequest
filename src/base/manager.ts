@@ -72,8 +72,12 @@ export class reqManager extends GRequest {
         return reqManager;
     }
 
-    public static start(): void {
+    public static start(message?: string): void {
         reqManager.expressApp.listen(reqManager.port, () => {
+            if (message) {
+                console.log(message.replaceAll("{{port}}", reqManager.port.toString()));
+                return;
+            }
             console.log("Server is running on port " + reqManager.port);
         });
     }
