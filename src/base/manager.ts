@@ -127,7 +127,7 @@ export class reqManager extends GRequest {
         });
     }
 
-    public static async executeDirect<T extends boolean>(link: string, forceAuth: T, options: T extends true ? {
+    public static async executeDirect<T extends boolean>(link: string, forceAuth: T, callType: req.callType, options: T extends true ? {
         body?: json.type,
         header?: undefined,
         linkVar?: typeExt<json.type, {[key in string]: string}>,
@@ -141,7 +141,7 @@ export class reqManager extends GRequest {
         let finded = false;
         let posJ = -1;
         for (var i = 0; i < reqManager.requests.length; i++) {
-            if (reqManager.requests[i].link === link) {
+            if (reqManager.requests[i].callType === callType && reqManager.requests[i].link === link) {
                 finded = true;
                 posJ = i;
                 break;
@@ -166,11 +166,13 @@ export class reqManager extends GRequest {
             }
         }
 
-        for (let i = 0; i < cmd.inTemplates.length; i++) {
-            if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
-            body = json.IsRespectTemplate(body, cmd.inTemplates[i], true) as any;
-            template = i;
-            break;
+        if (!forceAuth) {
+            for (let i = 0; i < cmd.inTemplates.length; i++) {
+                if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
+                body = json.IsRespectTemplate(body, cmd.inTemplates[i], true) as any;
+                template = i;
+                break;
+            }
         }
 
         if (template === -1 && cmd.inTemplates.length > 0) {
