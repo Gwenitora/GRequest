@@ -75,6 +75,7 @@ export class reqManager extends GRequest {
     public static start(message?: string): void {
         reqManager.expressApp.listen(reqManager.port, () => {
             if (message !== undefined) {
+                if (message === "") return;
                 console.log(message.replaceAll("{{port}}", reqManager.port.toString()));
                 return;
             }
