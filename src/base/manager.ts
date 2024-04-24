@@ -1,6 +1,6 @@
 import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
-import { debug, getClasses, json } from "@gscript/gtools";
+import { colors, debug, getClasses, json } from "@gscript/gtools";
 import express from 'express'
 import { req, requ, resu } from '@gscript/grequest'
 
@@ -79,7 +79,7 @@ export class reqManager extends GRequest {
                 console.log(message.replaceAll("{{port}}", reqManager.port.toString()));
                 return;
             }
-            console.log("Server is running on port " + reqManager.port);
+            console.log(colors.fg.green + "Server is running on port " + reqManager.port);
         });
     }
 
