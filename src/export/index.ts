@@ -1,7 +1,7 @@
 export namespace req {
     export enum type {
-        ON,
-        ONCE
+        PUBLIC,
+        PRIVATE
     }
 
     export enum callType {
