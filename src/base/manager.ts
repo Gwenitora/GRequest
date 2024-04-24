@@ -84,49 +84,13 @@ export class reqManager extends GRequest {
     }
 
     private static execute(cmd: Request, requ: requ, resu: resu): void {
-        let header = requ.headers;
+        let header = requ.headers as { [key in string]: string };
         let body = requ.body;
-        let linkVar = requ.params;
-        let query = requ.query;
-        let template = -1;
-        if (header === undefined) header = {};
-        if (linkVar === undefined) linkVar = {};
-        if (query === undefined) query = {};
+        let linkVar = requ.params as { [key in string]: string };
+        let query = requ.query as { [key in string]: string };
 
-        if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
-            if (cmd.secret) {
-                resu.status(req.HTTPerror.NotFound).json("Command not found").send();
-            } else {
-                resu.status(req.HTTPerror.Unauthorized).json("Unauthorized").send();
-            }
-            return;
-        }
-
-        for (let i = 0; i < cmd.inTemplates.length; i++) {
-            if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
-            body = json.IsRespectTemplate(body, cmd.inTemplates[i], true);
-            template = i;
-            break;
-        }
-
-        if (template === -1 && cmd.inTemplates.length > 0) {
-            resu.status(req.HTTPerror.BadRequest).json("Bad request").send();
-            return;
-        }
-        if (cmd.inTemplates.length === 0) {
-            body = undefined;
-        }
-
-        cmd.run(template, body, header as any, linkVar, query as any).then((result) => {
-            if ((cmd.outTemplates.length === 0 && (result.resBody === undefined || typeof result.resBody === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) !== null)) {
-                if (cmd.outTemplates.length !== 0) result.resBody = json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) as json.type;
-                resu.status(result.resCode).json(result.resBody).send();
-            }
-            resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
-            debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
-        }).catch((err) => {
-            resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
-            debug.logErr("Internal server error due to promise rejection in " + cmd.link + " command");
+        const res = reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
+            resu.status(result.resCode).json(result.resBody).send();
         });
     }
 
