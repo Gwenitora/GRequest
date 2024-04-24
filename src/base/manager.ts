@@ -2,7 +2,7 @@ import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
 import { getClasses, json } from "@gscript/gtools";
 import express from 'express'
-import { requ, resu } from '@gscript/grequest'
+import { req, requ, resu } from '@gscript/grequest'
 
 export class reqManager extends GRequest {
     private static requests: Request[] = [];
@@ -44,6 +44,6 @@ export class reqManager extends GRequest {
         let body = requ.body;
         let linkVar = requ.params;
         let template = 0;
-        let res: {resBody: json.type, resCode: number};
+        let res: {resBody: json.type, resCode: req.HTTPerror};
     }
 }
