@@ -12,5 +12,5 @@ export abstract class Request extends GRequest  {
     abstract secret : boolean;
 
     abstract start(): boolean;
-    abstract run(template: number, body: json.type, header: json.type, linkVar: typeExt<json.type, {[key in string]: string}>, query: typeExt<json.type, {[key in string]: string}>): Promise<{resBody: json.type, resCode: req.HTTPerror}>;
+    abstract run(template: number, body: json.type, header: typeExt<json.type, {[key in string] : string}>, linkVar: typeExt<json.type, {[key in string]: string}>, query: typeExt<json.type, {[key in string]: string}>): Promise<{resBody: json.type, resCode: req.HTTPerror}>;
 }

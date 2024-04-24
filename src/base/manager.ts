@@ -1,6 +1,6 @@
 import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
-import { colors, debug, getClasses, json } from "@gscript/gtools";
+import { colors, debug, getClasses, json, typeExt } from "@gscript/gtools";
 import express from 'express'
 import { req, requ, resu } from '@gscript/grequest'
 
@@ -114,17 +114,83 @@ export class reqManager extends GRequest {
             body = undefined;
         }
 
-        cmd.run(template, body, header, linkVar, query as any).then((result) => {
+        cmd.run(template, body, header as any, linkVar, query as any).then((result) => {
             if ((cmd.outTemplates.length === 0 && (result.resBody === undefined || typeof result.resBody === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) !== null)) {
                 if (cmd.outTemplates.length !== 0) result.resBody = json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) as json.type;
                 resu.status(result.resCode).json(result.resBody).send();
-            } else {
-                resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
-                debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
             }
+            resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
+            debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
         }).catch((err) => {
             resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
             debug.logErr("Internal server error due to promise rejection in " + cmd.link + " command");
         });
+    }
+
+    public static async executeDirect<T extends boolean>(link: string, forceAuth: T, options: T extends true ? {
+        body?: json.type,
+        header?: undefined,
+        linkVar?: typeExt<json.type, {[key in string]: string}>,
+        query?: typeExt<json.type, {[key in string]: string}>
+    } : {
+        body?: json.type,
+        header?: typeExt<json.type, {[key in string] : string}>,
+        linkVar?: typeExt<json.type, {[key in string]: string}>,
+        query?: typeExt<json.type, {[key in string]: string}>
+    }): Promise<{resBody: json.type, resCode: req.HTTPerror}> {
+        let finded = false;
+        let posJ = -1;
+        for (var i = 0; i < reqManager.requests.length; i++) {
+            if (reqManager.requests[i].link === link) {
+                finded = true;
+                posJ = i;
+                break;
+            }
+        }
+        if (!finded) {
+            return {resBody: "Command not found", resCode: req.HTTPerror.NotFound};
+        }
+        let cmd: Request = reqManager.requests[posJ];
+
+        let header = options.header;
+        let body = options.body;
+        let linkVar = options.linkVar;
+        let query = options.query;
+        let template = -1;
+
+        if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
+            if (cmd.secret) {
+                return {resBody: "Command not found", resCode: req.HTTPerror.NotFound};
+            } else {
+                return {resBody: "Unauthorized", resCode: req.HTTPerror.Unauthorized};
+            }
+        }
+
+        for (let i = 0; i < cmd.inTemplates.length; i++) {
+            if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
+            body = json.IsRespectTemplate(body, cmd.inTemplates[i], true) as any;
+            template = i;
+            break;
+        }
+
+        if (template === -1 && cmd.inTemplates.length > 0) {
+            return {resBody: "Bad request", resCode: req.HTTPerror.BadRequest};
+        }
+        if (cmd.inTemplates.length === 0) {
+            body = undefined;
+        }
+
+        try {
+            const result = await cmd.run(template, body, header as any, linkVar as any, query as any);
+            if ((cmd.outTemplates.length === 0 && (result.resBody === undefined || typeof result.resBody === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) !== null)) {
+                if (cmd.outTemplates.length !== 0) result.resBody = json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) as json.type;
+                return result;
+            }
+            debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
+            return {resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError};
+        } catch (err) {
+            debug.logErr("Internal server error due to promise rejection in " + cmd.link + " command");
+            return {resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError};
+        }
     }
 }
