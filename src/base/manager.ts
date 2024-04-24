@@ -40,7 +40,7 @@ export class reqManager extends GRequest {
         }
 
         for (let i = 0; i < reqManager.requests.length; i++) {
-//            if (reqManager.requests[i].type === req.type.PRIVATE) continue;
+            if (reqManager.requests[i].type === req.type.PRIVATE) continue;
 
             reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link, (requ: requ, resu: resu) => {
                 reqManager.execute(reqManager.requests[i], requ, resu);
