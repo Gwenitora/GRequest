@@ -4,6 +4,14 @@ export namespace req {
         ONCE
     }
 
+    export enum callType {
+        GET = "get",
+        POST = "post",
+        PUT = "put",
+        DELETE = "delete",
+        PATCH = "patch"
+    }
+
     export enum HTTPerror {
         _100 = "Continue",
         _101 = "Switching Protocols",
