@@ -22,6 +22,7 @@ export class reqManager extends GRequest {
 
     public static init() {
         reqManager.requests = getClasses(Request);
+        this.expressApp.use(express.json())
 
         for (let i = 0; i < reqManager.requests.length; i++) {
             if (typeof reqManager.requests[i].authLevel === "string" && reqManager.authsFuncs[reqManager.requests[i].authLevel as string] === undefined) {
