@@ -6,9 +6,9 @@ export abstract class Request extends GRequest  {
     abstract link : string;
     abstract type : req.type;
     abstract callType : req.callType;
+    abstract authLevel: string | boolean;
     abstract inTemplates : json.template[];
     abstract outTemplates : json.template[];
-    abstract authLevel: string | boolean;
 
     abstract start(): boolean;
     abstract run(template: number, body: json.type, header: json.type, linkVar: typeExt<json.type, {[key in string]: string}>): Promise<{resBody: json.type, resCode: req.HTTPerror}>;

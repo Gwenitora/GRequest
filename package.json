@@ -1,6 +1,6 @@
 {
   "name": "@gscript/grequest",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "For easier request system",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
@@ -29,7 +29,7 @@
     "./lib/esm/"
   ],
   "dependencies": {
-    "@gscript/grequest": "^1.0.11",
+    "@gscript/grequest": "^1.0.12",
     "@gscript/gtools": "^1.1.12",
     "@types/express": "^4.17.21",
     "express": "^4.19.2"

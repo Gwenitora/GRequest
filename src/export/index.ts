@@ -8,8 +8,8 @@ export namespace req {
         GET = "get",
         POST = "post",
         PUT = "put",
-        DELETE = "delete",
-        PATCH = "patch"
+        PATCH = "patch",
+        DELETE = "delete"
     }
 
     export enum HTTPerror {

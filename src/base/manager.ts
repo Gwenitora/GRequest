@@ -37,6 +37,10 @@ export class reqManager extends GRequest {
                 reqManager.execute(reqManager.requests[i], requ, resu);
             });
         }
+
+        reqManager.expressApp.listen(reqManager.port, () => {
+            console.log("Server is running on port " + reqManager.port);
+        });
     }
 
     private static execute(cmd: Request, requ: requ, resu: resu): void {
