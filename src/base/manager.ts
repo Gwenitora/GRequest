@@ -48,7 +48,37 @@ export class reqManager extends GRequest {
         let header = requ.headers;
         let body = requ.body;
         let linkVar = requ.params;
-        let template = 0;
-        let res: {resBody: json.type, resCode: req.HTTPerror};
+        let query = requ.query;
+        let template = -1;
+
+        if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel])) {
+            if (cmd.secret) {
+                resu.status(req.HTTPerror.NotFound).json("Command not found").send();
+            } else {
+                resu.status(req.HTTPerror.Unauthorized).json("Unauthorized").send();
+            }
+            return;
+        }
+
+        for (let i = 0; i < cmd.inTemplates.length; i++) {
+            if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
+            template = i;
+            break;
+        }
+
+        if (template === -1) {
+            resu.status(req.HTTPerror.BadRequest).json("Bad request").send();
+            return;
+        }
+
+        cmd.run(template, body, header, linkVar, query as any).then((result) => {
+            if (json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) === null) {
+                resu.status(result.resCode).json(result.resBody).send();
+            } else {
+                resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
+            }
+        }).catch((err) => {
+            resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
+        });
     }
 }
