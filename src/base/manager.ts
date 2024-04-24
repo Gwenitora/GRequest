@@ -127,7 +127,7 @@ export class reqManager extends GRequest {
         });
     }
 
-    public static async executeDirect<T extends boolean>(link: string, forceAuth: T, callType: req.callType, options: T extends true ? {
+    public static async executeDirect<T extends boolean>(link: string, callType: req.callType, forceAuth: T, options: T extends true ? {
         body?: json.type,
         header?: undefined,
         linkVar?: typeExt<json.type, {[key in string]: string}>,
