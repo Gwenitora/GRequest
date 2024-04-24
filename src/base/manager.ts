@@ -1,6 +1,6 @@
 import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
-import { getClasses, json } from "@gscript/gtools";
+import { debug, getClasses, json } from "@gscript/gtools";
 import express from 'express'
 import { req, requ, resu } from '@gscript/grequest'
 
@@ -109,12 +109,15 @@ export class reqManager extends GRequest {
 
         cmd.run(template, body, header, linkVar, query as any).then((result) => {
             if ((cmd.outTemplates.length === 0 && (result.resBody === undefined || typeof result.resBody === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) !== null)) {
+                if (cmd.outTemplates.length !== 0) result.resBody = json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) as json.type;
                 resu.status(result.resCode).json(result.resBody).send();
             } else {
                 resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
+                debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
             }
         }).catch((err) => {
             resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
+            debug.logErr("Internal server error due to promise rejection in " + cmd.link + " command");
         });
     }
 }
