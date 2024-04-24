@@ -89,6 +89,9 @@ export class reqManager extends GRequest {
         let linkVar = requ.params;
         let query = requ.query;
         let template = -1;
+        if (header === undefined) header = {};
+        if (linkVar === undefined) linkVar = {};
+        if (query === undefined) query = {};
 
         if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
             if (cmd.secret) {
@@ -157,6 +160,9 @@ export class reqManager extends GRequest {
         let linkVar = options.linkVar;
         let query = options.query;
         let template = -1;
+        if (header === undefined) header = {};
+        if (linkVar === undefined) linkVar = {};
+        if (query === undefined) query = {};
 
         if (!forceAuth) {
             if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
