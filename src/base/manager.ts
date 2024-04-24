@@ -6,7 +6,7 @@ import { req, requ, resu } from '@gscript/grequest'
 
 export class reqManager extends GRequest {
     private static requests: Request[] = [];
-    private static authsFuncs: {[key in string]: (header: json.type) => boolean} = {};
+    private static authsFuncs: { [key in string]: (header: json.type) => boolean } = {};
     private static expressApp: express.Application = express();
     private static port: number = 3000;
     private static helper: boolean = false;
@@ -62,7 +62,7 @@ export class reqManager extends GRequest {
                 });
             }
         }
-        
+
         for (const call in req.callType) {
             reqManager.expressApp[req.callType[call as keyof typeof req.callType]]("*", (requ: requ, resu: resu) => {
                 resu.status(req.HTTPerror.NotFound).json("Command not found").send();
@@ -130,14 +130,14 @@ export class reqManager extends GRequest {
     public static async executeDirect<T extends boolean>(link: string, callType: req.callType, forceAuth: T, options: T extends true ? {
         body?: json.type,
         header?: undefined,
-        linkVar?: typeExt<json.type, {[key in string]: string}>,
-        query?: typeExt<json.type, {[key in string]: string}>
+        linkVar?: typeExt<json.type, { [key in string]: string }>,
+        query?: typeExt<json.type, { [key in string]: string }>
     } : {
         body?: json.type,
-        header?: typeExt<json.type, {[key in string] : string}>,
-        linkVar?: typeExt<json.type, {[key in string]: string}>,
-        query?: typeExt<json.type, {[key in string]: string}>
-    }): Promise<{resBody: json.type, resCode: req.HTTPerror}> {
+        header?: typeExt<json.type, { [key in string]: string }>,
+        linkVar?: typeExt<json.type, { [key in string]: string }>,
+        query?: typeExt<json.type, { [key in string]: string }>
+    }): Promise<{ resBody: json.type, resCode: req.HTTPerror }> {
         let finded = false;
         let posJ = -1;
         for (var i = 0; i < reqManager.requests.length; i++) {
@@ -148,7 +148,7 @@ export class reqManager extends GRequest {
             }
         }
         if (!finded) {
-            return {resBody: "Command not found", resCode: req.HTTPerror.NotFound};
+            return { resBody: "Command not found", resCode: req.HTTPerror.NotFound };
         }
         let cmd: Request = reqManager.requests[posJ];
 
@@ -158,25 +158,25 @@ export class reqManager extends GRequest {
         let query = options.query;
         let template = -1;
 
-        if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
-            if (cmd.secret) {
-                return {resBody: "Command not found", resCode: req.HTTPerror.NotFound};
-            } else {
-                return {resBody: "Unauthorized", resCode: req.HTTPerror.Unauthorized};
+        if (!forceAuth) {
+            if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
+                if (cmd.secret) {
+                    return { resBody: "Command not found", resCode: req.HTTPerror.NotFound };
+                } else {
+                    return { resBody: "Unauthorized", resCode: req.HTTPerror.Unauthorized };
+                }
             }
         }
 
-        if (!forceAuth) {
-            for (let i = 0; i < cmd.inTemplates.length; i++) {
-                if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
-                body = json.IsRespectTemplate(body, cmd.inTemplates[i], true) as any;
-                template = i;
-                break;
-            }
+        for (let i = 0; i < cmd.inTemplates.length; i++) {
+            if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
+            body = json.IsRespectTemplate(body, cmd.inTemplates[i], true) as any;
+            template = i;
+            break;
         }
 
         if (template === -1 && cmd.inTemplates.length > 0) {
-            return {resBody: "Bad request", resCode: req.HTTPerror.BadRequest};
+            return { resBody: "Bad request", resCode: req.HTTPerror.BadRequest };
         }
         if (cmd.inTemplates.length === 0) {
             body = undefined;
@@ -189,10 +189,10 @@ export class reqManager extends GRequest {
                 return result;
             }
             debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
-            return {resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError};
+            return { resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError };
         } catch (err) {
             debug.logErr("Internal server error due to promise rejection in " + cmd.link + " command");
-            return {resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError};
+            return { resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError };
         }
     }
 }
