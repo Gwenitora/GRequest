@@ -90,7 +90,7 @@ export class reqManager extends GRequest {
         let query = requ.query;
         let template = -1;
 
-        if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel])) {
+        if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
             if (cmd.secret) {
                 resu.status(req.HTTPerror.NotFound).json("Command not found").send();
             } else {
