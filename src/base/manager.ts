@@ -108,7 +108,7 @@ export class reqManager extends GRequest {
         }
 
         cmd.run(template, body, header, linkVar, query as any).then((result) => {
-            if ((cmd.outTemplates.length === 0 && (result === undefined || typeof result === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) === null)) {
+            if ((cmd.outTemplates.length === 0 && (result.resBody === undefined || typeof result.resBody === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) === null)) {
                 resu.status(result.resCode).json(result.resBody).send();
             } else {
                 resu.status(req.HTTPerror.InternalServerError).json("Internal server error").send();
