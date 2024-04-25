@@ -145,7 +145,7 @@ export class reqManager extends GRequest {
     /**
      * Start the server.
      * You can setup the port in the `.env` file with the `API_PORT` variable, the default port is 3000.
-     * You can finaly setup the domain of your api with the `API_DOMAIN` variable in the `.env` file, the default domain is `http://localhost`.
+     * You can finaly setup the domain of your api with the `API_DOMAIN` variable in the `.env` file, the default domain is `http://localhost`, and please, do not precise the port and do not close with a `/` like `http://localhost`, not like `http://localhost/` or `http://localhost:3000` or `http://localhost:3000/`.
      * 
      * @param message Message to display when the server is started, you can add `{{port}}` in your message to write the port at this place (if empty like "", no message will be displayed, and if not defined, default message will send).
      * @returns reqManager for chaining call.
