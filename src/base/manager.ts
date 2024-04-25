@@ -114,7 +114,7 @@ export class reqManager extends GRequest {
         }
 
         reqManager.expressApp.get("/img/*", (req: req, resu: res) => {
-            let path = req.path.split("/img/")[1];
+            let path = req.path.split("/img/").splice(1, req.path.split("/img/").length - 1).join("/img/");
             let name = path.split('/')[path.split('/').length - 1];
             name = name.split(".").splice(0, name.split(".").length - 1).join(".")
             let ext = path.split(".").splice(path.split(".").length - 1)[0];
