@@ -1,16 +1,71 @@
 import { json, typeExt } from "@gscript/gtools";
-import { req } from "../export";
+import { requ } from "../export";
 import { GRequest } from "../GRequest";
 
+/**
+ * Template of request class for make detectable by the manager.
+ */
 export abstract class Request extends GRequest  {
+    /**
+     * Link of the request.
+     * 
+     * @example "/hw"
+     * @example "/hello/world"
+     * @example "/mod/:id/version"
+     */
     abstract link : string;
-    abstract type : req.type;
-    abstract callType : req.callType;
+    /**
+     * Type of the request.
+     * It's here you define if the request is public or private.
+     */
+    abstract type : requ.type;
+    /**
+     * Type of the call.
+     * It's here you define if the request is a `GET`, `POST`, `PUT`, `PATCH` or `DELETE`.
+     */
+    abstract callType : requ.callType;
+    /**
+     * Auth level of the request.
+     * 
+     * true signifie that request have a authFunction return every time true, and everyone can access to this command.
+     * false signifie that request have a authFunction return every time false, and no one can access to this command.
+     * 
+     * If you have create different auth level, you can put the name of the auth level here.
+     * But if the auth level is not define, the script is shutdown with an error.
+     */
     abstract authLevel: string | boolean;
+    /**
+     * Templates of the request.
+     * You can make multiple templates for the request.
+     * The id of template is the index in the array, this id is send to you when a request is execute.
+     */
     abstract inTemplates : json.template[];
+    /**
+     * Templates your response.
+     * If your response is not in the template, an internal error will send to the client.
+     */
     abstract outTemplates : json.template[];
+    /**
+     * If the request is secret the helper is automatically disable for this request only.
+     * And the unauthorize http code is replace by the not found http code.
+     * That is for protect your command.
+     */
     abstract secret : boolean;
 
+    /**
+     * Start function of the request.
+     * This function is call when the manager is init.
+     */
     abstract start(): boolean;
-    abstract run(template: number, body: json.type, header: typeExt<json.type, {[key in string] : string}>, linkVar: typeExt<json.type, {[key in string]: string}>, query: typeExt<json.type, {[key in string]: string}>): Promise<{resBody: json.type, resCode: req.HTTPerror}>;
+    /**
+     * Run is called when the request is execute, and conditions is respects (`auth`, `inTemplates`..).
+     * 
+     * @param template The id of the template used, it's the index in the array in your `inTemplates`.
+     * @param body The body of the request (respect strictly a template of `inTemplates`).
+     * @param header The header of the request.
+     * @param linkVar If you have make variable in your link, you can get them here (example: `/mod/:id/version` => `{id: string}`).
+     * @param query also variables in your link but not previsible (optionnal) and with other format (example: `/hw?id=1` => `{version: string}`).
+     * @returns The response of the request, with the body response and the status code.
+     */
+    abstract run(template: number, body: json.type, header: typeExt<json.type, {[key in string] : string}>, linkVar: typeExt<json.type, {[key in string]: string}>, query: typeExt<json.type, {[key in string]: string}>): Promise<{resBody: json.type, resCode: requ.httpCodes.all}>;
 }

@@ -1,12 +1,23 @@
-import { req } from './export'
+import { requ } from './export'
 import { Request } from './base/reqClass'
 import { reqManager } from './base/manager'
-import { Request as requ, Response as resu } from 'express'
+import { Request as request, Response as response } from 'express'
+
+/**
+ * The type of a request by `express`.
+ * Not very important for you, but it's here if you want.
+ */
+type req = request;
+/**
+ * The type of a response by `express`.
+ * Not very important for you, but it's here if you want.
+ */
+type res = response;
 
 export {
-    req,
+    requ,
     reqManager,
     Request,
-    requ,
-    resu
+    req,
+    res
 }

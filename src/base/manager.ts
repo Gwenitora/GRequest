@@ -2,30 +2,52 @@ import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
 import { colors, debug, env, getClasses, img, json, typeExt } from "@gscript/gtools";
 import express from 'express'
-import { req, requ, resu } from '@gscript/grequest'
+import { req, res } from '..'
+import { requ } from "../export";
 
+/**
+ * For start, setup and manage Requests.
+ */
 export class reqManager extends GRequest {
     private static requests: Request[] = [];
     private static authsFuncs: { [key in string]: (header: json.type) => boolean } = {};
     private static expressApp: express.Application = express();
-    private static port: number = 3000;
+    private static port: number;
     private static helper: boolean = false;
 
-    public static setHelper(value: boolean): typeof reqManager {
+    /**
+     * Create an homonyme of every request to send you many help about the request (just add `/help` at the end of the link).
+     * If a request is secret, the help will not be available but only for that one.
+     * 
+     * @param value True for activate the helper, false for deactivate it.
+     * @returns reqManager for chaining call.
+     */
+    public static setHelper(value: boolean = true): typeof reqManager {
         reqManager.helper = value;
         return reqManager;
     }
 
-    public static setPort(port: number): typeof reqManager {
-        reqManager.port = port;
-        return reqManager;
-    }
-
+    /**
+     * Create a new auth level, usable in the `authLevel` property of a request.
+     * 
+     * @param name The name of the auth level (use that name in the `authLevel` property of a request, and must be unique).
+     * @param func The function to check if the user is allowed to use the command (with the header of the request as parameter, return true if the user is allowed, false otherwise).
+     * @returns reqManager for chaining call.
+     */
     public static createAuthLevel(name: string, func: (header: json.type) => boolean): typeof reqManager {
         reqManager.authsFuncs[name] = func;
         return reqManager;
     }
 
+    /**
+     * Activate the img links (useful for img commands).
+     * For access to an img as extern request, use the path `/img/` followed by the path of the img in the img folder, and the img folder depending the config of your img class.
+     * You can change the domain of the img by changing the `API_DOMAIN` in the env class, do not precise the port and do not close with a `/` like `http://localhost`, not like `http://localhost/` or `http://localhost:3000` or `http://localhost:3000/`.
+     * if the domain is not set, the default domain is `http://localhost`.
+     * 
+     * @param value True for activate the img links, false for deactivate it.
+     * @returns reqManager for chaining call.
+     */
     public static activeImgLinks(value: boolean): typeof reqManager {
         img.eventUpdateCache().removeEvent("LinkUpdater by @GScript/GRequest");
         if (value) {
@@ -39,12 +61,19 @@ export class reqManager extends GRequest {
                     img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + "/img" + datasSplit.splice(1, datasSplit.length - 1).join("." + img.path()));
                 }
             })
-            img.updateCache();
         }
+        img.updateCache();
         return reqManager;
     }
 
+    /**
+     * To setup all detect requests (execute the start method of all requests, and save it all of them).
+     * All requests detected is all classes that extends the `Request` class.
+     * 
+     * @returns reqManager for chaining call.
+     */
     public static init(): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.requests = getClasses(Request);
         this.expressApp.use(express.json())
 
@@ -58,16 +87,16 @@ export class reqManager extends GRequest {
         }
 
         for (let i = 0; i < reqManager.requests.length; i++) {
-            if (reqManager.requests[i].type === req.type.PRIVATE) continue;
+            if (reqManager.requests[i].type === requ.type.PRIVATE) continue;
 
-            reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link, (requ: requ, resu: resu) => {
+            reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link, (requ: req, resu: res) => {
                 reqManager.execute(reqManager.requests[i], requ, resu);
             });
 
             if (reqManager.requests[i].secret) continue;
 
             if (reqManager.helper) {
-                reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link + "/help", (requ: requ, resu: resu) => {
+                reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link + "/help", (req: req, resu: res) => {
                     let help = {
                         link: reqManager.requests[i].link,
                         type: reqManager.requests[i].type,
@@ -76,13 +105,13 @@ export class reqManager extends GRequest {
                         inTemplates: reqManager.requests[i].inTemplates,
                         outTemplates: reqManager.requests[i].outTemplates
                     }
-                    resu.status(req.HTTPerror.OK).json(help).send();
+                    resu.status(requ.httpCodes._200_Success._200_OK).json(help).send();
                 });
             }
         }
 
-        reqManager.expressApp.get("/img/*", (requ: requ, resu: resu) => {
-            let path = requ.path.split("/img/")[1];
+        reqManager.expressApp.get("/img/*", (req: req, resu: res) => {
+            let path = req.path.split("/img/")[1];
             let name = path.split('/')[path.split('/').length - 1];
             name = name.split(".").splice(0, name.split(".").length - 1).join(".")
             let ext = path.split(".").splice(path.split(".").length - 1)[0];
@@ -92,22 +121,30 @@ export class reqManager extends GRequest {
             let Img = img.getImg(name, {ext, path});
 
             if (Img === undefined || Img[0].link.split(" ").length !== 1) {
-                resu.status(req.HTTPerror.NotFound).json("Command not found").send();
+                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
                 return;
             }
 
-            resu.status(req.HTTPerror.OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
+            resu.status(requ.httpCodes._200_Success._200_OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
         });
 
-        for (const call in req.callType) {
-            reqManager.expressApp[req.callType[call as keyof typeof req.callType]]("*", (requ: requ, resu: resu) => {
-                resu.status(req.HTTPerror.NotFound).json("Command not found").send();
+        for (const call in requ.callType) {
+            reqManager.expressApp[requ.callType[call as keyof typeof requ.callType]]("*", (req: req, resu: res) => {
+                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
             });
         }
 
         return reqManager;
     }
 
+    /**
+     * Start the server.
+     * You can setup the port in the `.env` file with the `API_PORT` variable, the default port is 3000.
+     * You can finaly setup the domain of your api with the `API_DOMAIN` variable in the `.env` file, the default domain is `http://localhost`.
+     * 
+     * @param message Message to display when the server is started, you can add `{{port}}` in your message to write the port at this place (if empty like "", no message will be displayed, and if not defined, default message will send).
+     * @returns reqManager for chaining call.
+     */
     public static start(message?: string): void {
         reqManager.expressApp.listen(reqManager.port, () => {
             if (message !== undefined) {
@@ -119,18 +156,27 @@ export class reqManager extends GRequest {
         });
     }
 
-    private static execute(cmd: Request, requ: requ, resu: resu): void {
-        let header = requ.headers as { [key in string]: string };
-        let body = requ.body;
-        let linkVar = requ.params as { [key in string]: string };
-        let query = requ.query as { [key in string]: string };
+    private static execute(cmd: Request, req: req, resu: res): void {
+        let header = req.headers as { [key in string]: string };
+        let body = req.body;
+        let linkVar = req.params as { [key in string]: string };
+        let query = req.query as { [key in string]: string };
 
         const res = reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
             resu.status(result.resCode).json(result.resBody).send();
         });
     }
 
-    public static async executeDirect<T extends boolean>(link: string, callType: req.callType, forceAuth: T, options: T extends true ? {
+    /**
+     * Execute a command as local, it's also the only possibilities to execute a `PRIVATE` command.
+     * 
+     * @param link The string you have entered in the `link` property of the request.
+     * @param callType If you want to use the `GET`, `POST`, `PUT`, `PATCH` or `DELETE` method.
+     * @param forceAuth To access force access, if is false and command need authorisation, you need to send the header with a valid connection for this request.
+     * @param options All possible options for the request. Please forgot no one, thanks
+     * @returns A promise with the response body and the response code.
+     */
+    public static async executeDirect<T extends boolean>(link: string, callType: requ.callType, forceAuth: T, options: T extends true ? {
         body?: json.type,
         header?: undefined,
         linkVar?: typeExt<json.type, { [key in string]: string }>,
@@ -140,7 +186,7 @@ export class reqManager extends GRequest {
         header?: typeExt<json.type, { [key in string]: string }>,
         linkVar?: typeExt<json.type, { [key in string]: string }>,
         query?: typeExt<json.type, { [key in string]: string }>
-    }): Promise<{ resBody: json.type, resCode: req.HTTPerror }> {
+    }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all }> {
         let finded = false;
         let posJ = -1;
         for (var i = 0; i < reqManager.requests.length; i++) {
@@ -151,7 +197,7 @@ export class reqManager extends GRequest {
             }
         }
         if (!finded) {
-            return { resBody: "Command not found", resCode: req.HTTPerror.NotFound };
+            return { resBody: "Command not found", resCode: requ.httpCodes._400_ClientError._404_NotFound };
         }
         let cmd: Request = reqManager.requests[posJ];
 
@@ -167,9 +213,9 @@ export class reqManager extends GRequest {
         if (!forceAuth) {
             if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
                 if (cmd.secret) {
-                    return { resBody: "Command not found", resCode: req.HTTPerror.NotFound };
+                    return { resBody: "Command not found", resCode: requ.httpCodes._400_ClientError._404_NotFound };
                 } else {
-                    return { resBody: "Unauthorized", resCode: req.HTTPerror.Unauthorized };
+                    return { resBody: "Unauthorized", resCode: requ.httpCodes._400_ClientError._401_Unauthorized };
                 }
             }
         }
@@ -182,7 +228,7 @@ export class reqManager extends GRequest {
         }
 
         if (template === -1 && cmd.inTemplates.length > 0) {
-            return { resBody: "Bad request", resCode: req.HTTPerror.BadRequest };
+            return { resBody: "Bad request", resCode: requ.httpCodes._400_ClientError._400_BadRequest };
         }
         if (cmd.inTemplates.length === 0) {
             body = undefined;
@@ -195,10 +241,10 @@ export class reqManager extends GRequest {
                 return result;
             }
             debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
-            return { resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError };
+            return { resBody: "Internal server error", resCode: requ.httpCodes._500_ServerError._500_InternalServerError };
         } catch (err) {
             debug.logErr("Internal server error due to promise rejection in " + cmd.link + " command");
-            return { resBody: "Internal server error", resCode: req.HTTPerror.InternalServerError };
+            return { resBody: "Internal server error", resCode: requ.httpCodes._500_ServerError._500_InternalServerError };
         }
     }
 }
