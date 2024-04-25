@@ -31,9 +31,10 @@ export class reqManager extends GRequest {
         if (value) {
             img.eventUpdateCache().addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
                 for (let i = 0; i < datas.length; i++) {
-                    img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + datas[i].path.split("." + img.path)[1]);
+                    img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + "/img" + datas[i].path.split("." + img.path)[1]);
                 }
             })
+            img.updateCache();
         }
         return reqManager;
     }
