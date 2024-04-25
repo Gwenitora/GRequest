@@ -76,6 +76,10 @@ export class reqManager extends GRequest {
             }
         }
 
+        reqManager.expressApp.get("/img/*", (requ: requ, resu: resu) => {
+            resu.status(req.HTTPerror.NotFound).json("Command not found !!!").send();
+        });
+
         for (const call in req.callType) {
             reqManager.expressApp[req.callType[call as keyof typeof req.callType]]("*", (requ: requ, resu: resu) => {
                 resu.status(req.HTTPerror.NotFound).json("Command not found").send();
