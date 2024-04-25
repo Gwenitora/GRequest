@@ -84,7 +84,8 @@ export class reqManager extends GRequest {
             let path = requ.path.split("/img/")[1];
             let name = path.split(".").splice(0, path.split(".").length - 1).join(".")
             let ext = path.split(".").splice(path.split(".").length - 1)[0];
-            path = img.path() + name + '.' + ext;
+            path = img.path() + '/' + path;
+            path = path.split("").splice(1, path.split("").length - 1).join("");
 
             let Img = img.getImg(name, {ext, path});
 
@@ -93,7 +94,7 @@ export class reqManager extends GRequest {
                 return;
             }
 
-            resu.status(req.HTTPerror.OK).sendFile(Img[0].path);
+            resu.status(req.HTTPerror.OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
         });
 
         for (const call in req.callType) {
