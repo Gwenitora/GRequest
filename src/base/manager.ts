@@ -88,7 +88,7 @@ export class reqManager extends GRequest {
 
             let Img = img.getImg(name, {ext, path});
 
-            if (Img === undefined || Img[0].link.split(" ").length === 1) {
+            if (Img === undefined || Img[0].link.split(" ").length !== 1) {
                 resu.status(req.HTTPerror.NotFound).json("Command not found").send();
                 return;
             }
