@@ -1,6 +1,6 @@
 import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
-import { colors, debug, getClasses, json, typeExt } from "@gscript/gtools";
+import { colors, debug, env, getClasses, img, json, typeExt } from "@gscript/gtools";
 import express from 'express'
 import { req, requ, resu } from '@gscript/grequest'
 
@@ -24,6 +24,17 @@ export class reqManager extends GRequest {
     public static createAuthLevel(name: string, func: (header: json.type) => boolean): typeof reqManager {
         reqManager.authsFuncs[name] = func;
         return reqManager;
+    }
+
+    public static activeImgLinks(value: boolean): void {
+        img.eventUpdateCache.removeEvent("LinkUpdater by @GScript/GRequest");
+        if (value) {
+            img.eventUpdateCache.addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
+                for (let i = 0; i < datas.length; i++) {
+                    img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + datas[i].path.split("." + img.path)[1]);
+                }
+            })
+        }
     }
 
     public static init(): typeof reqManager {
