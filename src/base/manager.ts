@@ -26,7 +26,7 @@ export class reqManager extends GRequest {
         return reqManager;
     }
 
-    public static activeImgLinks(value: boolean): void {
+    public static activeImgLinks(value: boolean): typeof reqManager {
         img.eventUpdateCache.removeEvent("LinkUpdater by @GScript/GRequest");
         if (value) {
             img.eventUpdateCache.addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
@@ -35,6 +35,7 @@ export class reqManager extends GRequest {
                 }
             })
         }
+        return reqManager;
     }
 
     public static init(): typeof reqManager {
