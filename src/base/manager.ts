@@ -31,6 +31,10 @@ export class reqManager extends GRequest {
         if (value) {
             img.eventUpdateCache().addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
                 for (let i = 0; i < datas.length; i++) {
+                    if (datas[i].path.split(" ").length !== 1) {
+                        img.editLink(datas[i].id, "The path is invalid because contain one or more space(s) !!");
+                        continue;
+                    }
                     img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + "/img" + datas[i].path.split("." + img.path())[1]);
                 }
             })
@@ -77,7 +81,19 @@ export class reqManager extends GRequest {
         }
 
         reqManager.expressApp.get("/img/*", (requ: requ, resu: resu) => {
-            resu.status(req.HTTPerror.NotFound).json("Command not found !!!").send();
+            let path = requ.path.split("/img/")[1];
+            let name = path.split(".").splice(0, path.split(".").length - 1).join(".")
+            let ext = path.split(".").splice(path.split(".").length - 1)[0];
+            path = './' + img.path() + name + '.' + ext;
+
+            let Img = img.getImg(name, {ext, path});
+
+            if (Img === undefined || Img[0].link.split(" ").length === 1) {
+                resu.status(req.HTTPerror.NotFound).json("Command not found").send();
+                return;
+            }
+
+            resu.status(req.HTTPerror.OK).sendFile(Img[0].path);
         });
 
         for (const call in req.callType) {
