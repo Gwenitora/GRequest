@@ -84,7 +84,7 @@ export class reqManager extends GRequest {
             let path = requ.path.split("/img/")[1];
             let name = path.split(".").splice(0, path.split(".").length - 1).join(".")
             let ext = path.split(".").splice(path.split(".").length - 1)[0];
-            path = './' + img.path() + name + '.' + ext;
+            path = img.path() + name + '.' + ext;
 
             let Img = img.getImg(name, {ext, path});
 
