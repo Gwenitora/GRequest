@@ -27,9 +27,9 @@ export class reqManager extends GRequest {
     }
 
     public static activeImgLinks(value: boolean): typeof reqManager {
-        img.eventUpdateCache.removeEvent("LinkUpdater by @GScript/GRequest");
+        img.eventUpdateCache().removeEvent("LinkUpdater by @GScript/GRequest");
         if (value) {
-            img.eventUpdateCache.addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
+            img.eventUpdateCache().addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
                 for (let i = 0; i < datas.length; i++) {
                     img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + datas[i].path.split("." + img.path)[1]);
                 }
