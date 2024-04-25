@@ -48,7 +48,7 @@ export class reqManager extends GRequest {
      * @param value True for activate the img links, false for deactivate it.
      * @returns reqManager for chaining call.
      */
-    public static activeImgLinks(value: boolean): typeof reqManager {
+    public static activeImgLinks(value: boolean = true): typeof reqManager {
         img.eventUpdateCache().removeEvent("LinkUpdater by @GScript/GRequest");
         if (value) {
             img.eventUpdateCache().addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
