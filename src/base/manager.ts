@@ -23,6 +23,7 @@ export class reqManager extends GRequest {
      * @returns reqManager for chaining call.
      */
     public static setHelper(value: boolean = true): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.helper = value;
         return reqManager;
     }
@@ -35,6 +36,7 @@ export class reqManager extends GRequest {
      * @returns reqManager for chaining call.
      */
     public static createAuthLevel(name: string, func: (header: json.type) => boolean): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.authsFuncs[name] = func;
         return reqManager;
     }
@@ -49,6 +51,7 @@ export class reqManager extends GRequest {
      * @returns reqManager for chaining call.
      */
     public static activeImgLinks(value: boolean = true): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         img.eventUpdateCache().removeEvent("LinkUpdater by @GScript/GRequest");
         if (value) {
             img.eventUpdateCache().addOnEvent("LinkUpdater by @GScript/GRequest", (datas) => {
@@ -134,6 +137,8 @@ export class reqManager extends GRequest {
             });
         }
 
+        img.updateCache();
+
         return reqManager;
     }
 
@@ -146,6 +151,7 @@ export class reqManager extends GRequest {
      * @returns reqManager for chaining call.
      */
     public static start(message?: string): void {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.expressApp.listen(reqManager.port, () => {
             if (message !== undefined) {
                 if (message === "") return;
