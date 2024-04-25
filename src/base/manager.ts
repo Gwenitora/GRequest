@@ -35,7 +35,8 @@ export class reqManager extends GRequest {
                         img.editLink(datas[i].id, "The path is invalid because contain one or more space(s) !!");
                         continue;
                     }
-                    img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + "/img" + datas[i].path.split("." + img.path())[1]);
+                    const datasSplit = datas[i].path.split("." + img.path());
+                    img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + "/img" + datasSplit.splice(1, datasSplit.length - 1).join("." + img.path()));
                 }
             })
             img.updateCache();
