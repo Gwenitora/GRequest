@@ -16,6 +16,15 @@ export class reqManager extends GRequest {
     private static helper: boolean = false;
 
     /**
+     * getter for express app
+     * 
+     * @returns express app
+     */
+    public static get app(): express.Application {
+        return reqManager.expressApp;
+    }
+
+    /**
      * Create an homonyme of every request to send you many help about the request (just add `/help` at the end of the link).
      * If a request is secret, the help will not be available but only for that one.
      * 
