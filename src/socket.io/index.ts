@@ -46,7 +46,7 @@ export class SocketIO extends GRequest {
      * @param func The function to add to the connection list
      * @returns The SocketIO server to chain the methods
      */
-    public static addConnectionFunction(func: typeof SocketIO.connection[number]): typeof SocketIO {
+    public static addConnectionFunction(func: (socket: sockets) => {}): typeof SocketIO {
         SocketIO.connection.push(func);
         return SocketIO;
     }
@@ -57,7 +57,7 @@ export class SocketIO extends GRequest {
      * @param func The function to add to the disconnection list
      * @returns The SocketIO server to chain the methods
      */
-    public static addDisconnectionFunction(func: typeof SocketIO.disconnection[number]): typeof SocketIO {
+    public static addDisconnectionFunction(func: (socket: sockets) => {}): typeof SocketIO {
         SocketIO.disconnection.push(func);
         return SocketIO;
     }
