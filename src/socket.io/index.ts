@@ -107,6 +107,12 @@ export class SocketIO extends GRequest {
         return SocketIO;
     }
 
+    /**
+     * Destroy a channel
+     * 
+     * @param channel The channel to destroy
+     * @returns The SocketIO server to chain the methods
+     */
     public static destroyChannel(channel: string) : typeof SocketIO {
         if (SocketIO.channels[channel]) {
             if (SocketIO.channels[channel].length !== 0) {
@@ -114,6 +120,7 @@ export class SocketIO extends GRequest {
                 for (let i = 0; i < SocketIO.channels[channel].length; i++) {
                     SocketIO.quitChannel(SocketIO.channels[channel][i], channel);
                 }
+                return SocketIO;
             }
             delete SocketIO.channels[channel];
         }
@@ -208,6 +215,7 @@ export class SocketIO extends GRequest {
         SocketIO.disconnection.forEach((func) => {
             func(socket);
         });
+        SocketIO.quitChannel(socket);
         SocketIO.allSockets = SocketIO.allSockets.filter((s) => s !== socket);
     }
 }
