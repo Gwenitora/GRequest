@@ -177,7 +177,7 @@ export class reqManager extends GRequest {
         let linkVar = req.params as { [key in string]: string };
         let query = req.query as { [key in string]: string };
 
-        const res = reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
+        reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
             resu.status(result.resCode).json(result.resBody).send();
         });
     }
