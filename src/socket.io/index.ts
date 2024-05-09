@@ -10,8 +10,8 @@ export type sockets = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMa
  */
 export class SocketIO extends GRequest {
     private static io: Server;
-    private static connection: ((socket: sockets) => {})[] = [];
-    private static disconnection: ((socket: sockets) => {})[] = [];
+    private static connection: ((socket: sockets) => void)[] = [];
+    private static disconnection: ((socket: sockets) => void)[] = [];
     private static started: boolean = false;
     private static allSockets: sockets[];
     private static channels: { [key: string]: sockets[] } = {};
@@ -46,7 +46,7 @@ export class SocketIO extends GRequest {
      * @param func The function to add to the connection list
      * @returns The SocketIO server to chain the methods
      */
-    public static addConnectionFunction(func: (socket: sockets) => {}): typeof SocketIO {
+    public static addConnectionFunction(func: (socket: sockets) => void): typeof SocketIO {
         SocketIO.connection.push(func);
         return SocketIO;
     }
@@ -57,7 +57,7 @@ export class SocketIO extends GRequest {
      * @param func The function to add to the disconnection list
      * @returns The SocketIO server to chain the methods
      */
-    public static addDisconnectionFunction(func: (socket: sockets) => {}): typeof SocketIO {
+    public static addDisconnectionFunction(func: (socket: sockets) => void): typeof SocketIO {
         SocketIO.disconnection.push(func);
         return SocketIO;
     }
