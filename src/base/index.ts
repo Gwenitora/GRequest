@@ -180,7 +180,13 @@ export class reqManager extends GRequest {
 
         reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
             if (result.hasOwnProperty("resFile") !== undefined) {
-                resu.sendFile((result as any).resFile);
+                try {
+                    resu.sendFile((result as any).resFile, { root: __dirname + '/' + '../'.repeat(6) });
+                } catch (err) {
+                    debug.logErr("Internal server error due to bad file in " + cmd.link + " command");
+                    resu.json("Internal server error")
+                    result.resCode = 500;
+                }
             } else {
                 resu.json((result as any).resBody);
             }
