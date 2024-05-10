@@ -4,6 +4,7 @@ import { colors, debug, env, getClasses, img, json, typeExt } from "@gscript/gto
 import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
+import { readFileSync } from "fs";
 
 /**
  * For start, setup and manage Requests.
@@ -130,7 +131,7 @@ export class reqManager extends GRequest {
             path = '/' + path;
             path = path.split("").splice(1, path.split("").length - 1).join("");
 
-            let Img = img.getImg(name, {ext, path});
+            let Img = img.getImg(name, { ext, path });
 
             if (Img === undefined || Img[0].link.split(" ").length !== 1) {
                 resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
@@ -178,7 +179,12 @@ export class reqManager extends GRequest {
         let query = req.query as { [key in string]: string };
 
         reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
-            resu.status(result.resCode).json(result.resBody).send();
+            if (result.hasOwnProperty("resFile") !== undefined) {
+                resu.sendFile((result as any).resFile);
+            } else {
+                resu.json((result as any).resBody);
+            }
+            resu.status(result.resCode).send();
         });
     }
 
@@ -201,7 +207,7 @@ export class reqManager extends GRequest {
         header?: typeExt<json.type, { [key in string]: string }>,
         linkVar?: typeExt<json.type, { [key in string]: string }>,
         query?: typeExt<json.type, { [key in string]: string }>
-    }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all }> {
+    }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all } | { resFile: string, resCode: requ.httpCodes.all }> {
         let finded = false;
         let posJ = -1;
         for (var i = 0; i < reqManager.requests.length; i++) {
@@ -251,8 +257,12 @@ export class reqManager extends GRequest {
 
         try {
             const result = await cmd.run(template, body, header as any, linkVar as any, query as any);
-            if ((cmd.outTemplates.length === 0 && (result.resBody === undefined || typeof result.resBody === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) !== null)) {
-                if (cmd.outTemplates.length !== 0) result.resBody = json.IsRespectOneTemplate(result.resBody, cmd.outTemplates, true) as json.type;
+            if (result.hasOwnProperty("resFile") !== undefined) {
+                readFileSync((result as any).resFile, "utf-8");
+                return result;
+            }
+            if ((cmd.outTemplates.length === 0 && ((result as any).resBody === undefined || typeof (result as any).resBody === "string")) || (cmd.outTemplates.length !== 0 && json.IsRespectOneTemplate((result as any).resBody, cmd.outTemplates, true) !== null)) {
+                if (cmd.outTemplates.length !== 0) (result as any).resBody = json.IsRespectOneTemplate((result as any).resBody, cmd.outTemplates, true) as json.type;
                 return result;
             }
             debug.logErr("Internal server error due to bad response template in " + cmd.link + " command");
