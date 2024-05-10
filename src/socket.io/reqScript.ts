@@ -15,6 +15,6 @@ export class ReqScriptSocketIo extends Request {
     }
     
     async run(template: number, body: json.type, header: { [x: string]: string; }, linkVar: { [x: string]: string; }, query: { [x: string]: string; }): Promise<{ resFile: string; resCode: requ.httpCodes.all; }> {
-        return {resFile: "./node_modules/socket.io/client-dist/" + query.file, resCode: requ.httpCodes._200_Success._200_OK};
+        return {resFile: "./node_modules/socket.io/client-dist/" + linkVar.file, resCode: requ.httpCodes._200_Success._200_OK};
     }
 }
