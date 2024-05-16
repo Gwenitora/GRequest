@@ -218,7 +218,7 @@ export class reqManager extends GRequest {
         let query = req.query as { [key in string]: string };
 
         reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
-            if (result.hasOwnProperty("resFile") !== undefined) {
+            if (!result.hasOwnProperty("resFile")) {
                 try {
                     resu.sendFile((result as any).resFile, { root: __dirname + '/' + '../'.repeat(6) });
                 } catch (err) {
@@ -302,7 +302,7 @@ export class reqManager extends GRequest {
 
         try {
             const result = await cmd.run(template, body, header as any, linkVar as any, query as any);
-            if (result.hasOwnProperty("resFile") !== undefined) {
+            if (!result.hasOwnProperty("resFile")) {
                 readFileSync((result as any).resFile, "utf-8");
                 return result;
             }
