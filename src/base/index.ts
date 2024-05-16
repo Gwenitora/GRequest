@@ -80,11 +80,18 @@ export class reqManager extends GRequest {
         return reqManager;
     }
 
+    /**
+     * Activate the lang links (useful for lang commands).
+     * For access to a lang as extern request, use the path `/lang/` followed by the id of the lang.
+     * You can change the domain of the lang by changing the `API_DOMAIN` in the env class, do not precise the port and do not close with a `/` like `http://localhost`, not like `http://localhost/` or `http://localhost:3000` or `http://localhost:3000/`.
+     * if the domain is not set, the default domain is `http://localhost`.
+     * 
+     * @param value True for activate the lang links, false for deactivate it.
+     * @returns reqManager for chaining call.
+     */
     public static activeLangLinks(value: boolean = true): typeof reqManager {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
-        if (value) {
-            this.langActive = true;
-        }
+        this.langActive = value;
         return reqManager;
     }
 
@@ -153,12 +160,18 @@ export class reqManager extends GRequest {
         reqManager.expressApp.get("/lang/:id", (req: req, resu: res) => {
             if (!this.langActive) return;
             const id = req.params.id;
-            let lang: json.type = Langs.Lang({ lang: id });
-            if (lang === undefined) {
-                lang = Langs.Lang({ REGION: id })
+            let lang: json.type;
+            if (id === "") {
+                lang = Langs.lang;
             }
             if (lang === undefined) {
-                lang = Langs.Lang({ lg_RG: id })
+                lang = Langs.Lang({ lang: id });
+            }
+            if (lang === undefined) {
+                lang = Langs.Lang({ REGION: id });
+            }
+            if (lang === undefined) {
+                lang = Langs.Lang({ lg_RG: id });
             }
             if (lang === undefined) {
                 resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
