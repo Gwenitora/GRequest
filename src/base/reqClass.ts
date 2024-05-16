@@ -49,8 +49,10 @@ export abstract class Request extends GRequest  {
      * If the request is secret the helper is automatically disable for this request only.
      * And the unauthorize http code is replace by the not found http code.
      * That is for protect your command.
+     * 
+     * You can also choose to disable the command or the helper, but if one of them is disable, the other is automatically enable, and same for the invert.
      */
-    abstract secret : boolean;
+    abstract secret : boolean | { command?: true, helper: false } | { command: true, helper?: false } | { command?: false, helper: true } | { command: false, helper?: true };
 
     /**
      * Start function of the request.

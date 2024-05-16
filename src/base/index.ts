@@ -122,7 +122,7 @@ export class reqManager extends GRequest {
                 reqManager.execute(reqManager.requests[i], requ, resu);
             });
 
-            if (reqManager.requests[i].secret) continue;
+            if (reqManager.requests[i].secret === true || (reqManager.requests[i].secret as { command: boolean }).command === false || (reqManager.requests[i].secret as { helper: boolean }).helper === true) continue;
 
             if (reqManager.helper) {
                 reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link + "/help", (req: req, resu: res) => {
@@ -278,7 +278,7 @@ export class reqManager extends GRequest {
 
         if (!forceAuth) {
             if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
-                if (cmd.secret) {
+                if (cmd.secret === true || (cmd.secret as { command: boolean }).command === true || (cmd.secret as { helper: boolean }).helper === false) {
                     return { resBody: "Command not found", resCode: requ.httpCodes._400_ClientError._404_NotFound };
                 } else {
                     return { resBody: "Unauthorized", resCode: requ.httpCodes._400_ClientError._401_Unauthorized };
