@@ -1,6 +1,6 @@
 import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
-import { colors, debug, env, getClasses, img, json, typeExt } from "@gscript/gtools";
+import { colors, debug, env, getClasses, img, json, Langs, typeExt } from "@gscript/gtools";
 import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
@@ -15,6 +15,7 @@ export class reqManager extends GRequest {
     private static expressApp: express.Application = express();
     private static port: number;
     private static helper: boolean = false;
+    private static langActive: boolean = false;
 
     /**
      * getter for express app
@@ -79,6 +80,14 @@ export class reqManager extends GRequest {
         return reqManager;
     }
 
+    public static activeLangLinks(value: boolean = true): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
+        if (value) {
+            this.langActive = true;
+        }
+        return reqManager;
+    }
+
     /**
      * To setup all detect requests (execute the start method of all requests, and save it all of them).
      * All requests detected is all classes that extends the `Request` class.
@@ -139,6 +148,30 @@ export class reqManager extends GRequest {
             }
 
             resu.status(requ.httpCodes._200_Success._200_OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
+        });
+
+        reqManager.expressApp.get("/lang/:id", (req: req, resu: res) => {
+            const id = req.params.id;
+            let lang: json.type;
+            try {
+                lang = Langs.Lang({ lang: id })
+            } catch (err) {
+                try {
+                    lang = Langs.Lang({ REGION: id })
+                } catch (err) {
+                    try {
+                        lang = Langs.Lang({ lg_RG: id })
+                    } catch (err) {
+                        resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
+                        return;
+                    }
+                }
+            }
+            if (lang === undefined) {
+                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
+                return;
+            }
+            resu.status(requ.httpCodes._200_Success._200_OK).json(lang).send();
         });
 
         for (const call in requ.callType) {
