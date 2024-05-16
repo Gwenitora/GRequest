@@ -151,21 +151,14 @@ export class reqManager extends GRequest {
         });
 
         reqManager.expressApp.get("/lang/:id", (req: req, resu: res) => {
+            if (!this.langActive) return;
             const id = req.params.id;
-            let lang: json.type;
-            try {
-                lang = Langs.Lang({ lang: id })
-            } catch (err) {
-                try {
-                    lang = Langs.Lang({ REGION: id })
-                } catch (err) {
-                    try {
-                        lang = Langs.Lang({ lg_RG: id })
-                    } catch (err) {
-                        resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
-                        return;
-                    }
-                }
+            let lang: json.type = Langs.Lang({ lang: id });
+            if (lang === undefined) {
+                lang = Langs.Lang({ REGION: id })
+            }
+            if (lang === undefined) {
+                lang = Langs.Lang({ lg_RG: id })
             }
             if (lang === undefined) {
                 resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
