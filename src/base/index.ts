@@ -165,13 +165,13 @@ export class reqManager extends GRequest {
                 lang = Langs.lang;
             }
             if (lang === undefined) {
-                lang = Langs.Lang({ lang: id });
+                lang = Langs.getLang({ lang: id });
             }
             if (lang === undefined) {
-                lang = Langs.Lang({ REGION: id });
+                lang = Langs.getLang({ REGION: id });
             }
             if (lang === undefined) {
-                lang = Langs.Lang({ lg_RG: id });
+                lang = Langs.getLang({ lg_RG: id });
             }
             if (lang === undefined) {
                 resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
