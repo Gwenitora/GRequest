@@ -1,3 +1,6 @@
+import { UploadedFile } from "express-fileupload";
+import { Sharp } from "sharp";
+
 /**
  * some many tools for a request
  */
@@ -503,4 +506,16 @@ export namespace requ {
             _511_NetworkAuthenticationRequired = 511
         }
     }
+
+    /**
+     * The type of a file received on a form
+     */
+    export interface UploadedFileWithSharp extends UploadedFile {
+        sharp: Sharp;
+    }
+
+    /**
+     * The type of multiples files received on a form
+     */
+    export type fileArrayWithSharp = null | undefined | { [key in string]: UploadedFileWithSharp | UploadedFileWithSharp[] };
 }

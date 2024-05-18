@@ -69,5 +69,5 @@ export abstract class Request extends GRequest  {
      * @param query also variables in your link but not previsible (optionnal) and with other format (example: `/hw?id=1` => `{version: string}`).
      * @returns The response of the request, with the body response and the status code.
      */
-    abstract run(template: number, body: json.type, header: typeExt<json.type, {[key in string] : string}>, linkVar: typeExt<json.type, {[key in string]: string}>, query: typeExt<json.type, {[key in string]: string}>): Promise<{resBody: json.type, resCode: requ.httpCodes.all} | {resFile: string, resCode: requ.httpCodes.all}>;
+    abstract run(template: number, body: json.type, header: typeExt<json.type, {[key in string] : string}>, linkVar: typeExt<json.type, {[key in string]: string}>, query: typeExt<json.type, {[key in string]: string}>, files: requ.fileArrayWithSharp): Promise<{resBody: json.type, resCode: requ.httpCodes.all} | {resFile: string, resCode: requ.httpCodes.all}>;
 }

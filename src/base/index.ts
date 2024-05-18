@@ -5,6 +5,8 @@ import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
 import { readFileSync } from "fs";
+import fileUpload from "express-fileupload";
+import sharp from "sharp";
 
 /**
  * For start, setup and manage Requests.
@@ -104,7 +106,8 @@ export class reqManager extends GRequest {
     public static init(): typeof reqManager {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.requests = getClasses(Request);
-        this.expressApp.use(express.json())
+        this.expressApp.use(express.json());
+        this.expressApp.use(fileUpload());
 
         for (let i = 0; i < reqManager.requests.length; i++) {
             if (typeof reqManager.requests[i].authLevel === "string" && reqManager.authsFuncs[reqManager.requests[i].authLevel as string] === undefined) {
@@ -217,7 +220,33 @@ export class reqManager extends GRequest {
         let linkVar = req.params as { [key in string]: string };
         let query = req.query as { [key in string]: string };
 
-        reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query }).then((result) => {
+        var files: requ.fileArrayWithSharp = req.files as requ.fileArrayWithSharp;
+      
+        if (files !== null && files !== undefined) {
+          for (let key in files) {
+      
+            if (!Array.isArray(files[key])) {
+              const file = files[key] as requ.UploadedFileWithSharp;
+              if (file.mimetype.includes("image")) {
+                const sharpImage = sharp(file.data);
+                file.sharp = sharpImage;
+              }
+              continue;
+            }
+            
+            const files2 = files[key] as requ.UploadedFileWithSharp[];
+            for (let i = 0; i < files2.length; i++) {
+              const file = files2[i];
+              if (file.mimetype.includes("image")) {
+                const sharpImage = sharp(file.data);
+                file.sharp = sharpImage;
+              }
+            }
+            
+          }
+        }
+
+        reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query, files }).then((result) => {
             if (result.hasOwnProperty("resFile")) {
                 try {
                     resu.sendFile((result as any).resFile, { root: __dirname + '/' + '../'.repeat(6) });
@@ -246,12 +275,14 @@ export class reqManager extends GRequest {
         body?: json.type,
         header?: undefined,
         linkVar?: typeExt<json.type, { [key in string]: string }>,
-        query?: typeExt<json.type, { [key in string]: string }>
+        query?: typeExt<json.type, { [key in string]: string }>,
+        files?: requ.fileArrayWithSharp
     } : {
         body?: json.type,
         header?: typeExt<json.type, { [key in string]: string }>,
         linkVar?: typeExt<json.type, { [key in string]: string }>,
-        query?: typeExt<json.type, { [key in string]: string }>
+        query?: typeExt<json.type, { [key in string]: string }>,
+        files?: requ.fileArrayWithSharp
     }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all } | { resFile: string, resCode: requ.httpCodes.all }> {
         let finded = false;
         let posJ = -1;
@@ -271,10 +302,13 @@ export class reqManager extends GRequest {
         let body = options.body;
         let linkVar = options.linkVar;
         let query = options.query;
+        let files = options.files;
         let template = -1;
         if (header === undefined) header = {};
+        if (body === undefined) body = {};
         if (linkVar === undefined) linkVar = {};
         if (query === undefined) query = {};
+        if (files === undefined) files = {};
 
         if (!forceAuth) {
             if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
@@ -301,7 +335,7 @@ export class reqManager extends GRequest {
         }
 
         try {
-            const result = await cmd.run(template, body, header as any, linkVar as any, query as any);
+            const result = await cmd.run(template, body, header, linkVar, query, files);
             if (result.hasOwnProperty("resFile")) {
                 readFileSync((result as any).resFile, "utf-8");
                 return result;
