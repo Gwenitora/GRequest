@@ -518,7 +518,7 @@ export namespace requ {
     /**
      * The type of multiples files received on a form
      */
-    export type fileArrayWithSharp = null | undefined | { [key in string]: UploadedFileWithSharp | UploadedFileWithSharp[] };
+    export type fileArrayWithSharp = null | undefined | json.objPersoType<UploadedFileWithSharp | UploadedFileWithSharp[]>;
 
     /**
      * All the variables contents for a request
@@ -535,15 +535,15 @@ export namespace requ {
         /**
          * The header of the request.
          */
-        header: typeExt<json.type, {[key in string] : string}>,
+        header: typeExt<json.type, json.objPersoType<string>>,
         /**
          * If you have make variable in your link, you can get them here (example: `/mod/:id/version` => `{id: string}`).
          */
-        linkVar: typeExt<json.type, {[key in string]: string}>,
+        linkVar: typeExt<json.type, json.objPersoType<string>>,
         /**
          * also variables in your link but not previsible (optionnal) and with other format (example: `/hw?id=1` => `{version: string}`).
          */
-        query: typeExt<json.type, {[key in string]: string}>,
+        query: typeExt<json.type, json.objPersoType<string>>,
         /**
          * If you have files in your request, you can get them here.
          */

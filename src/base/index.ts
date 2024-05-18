@@ -13,7 +13,7 @@ import sharp from "sharp";
  */
 export class reqManager extends GRequest {
     private static requests: Request[] = [];
-    private static authsFuncs: { [key in string]: (header: json.type) => boolean } = {};
+    private static authsFuncs: json.objPersoType<(header: json.type) => boolean> = {};
     private static expressApp: express.Application = express();
     private static port: number;
     private static helper: boolean = false;
@@ -215,10 +215,10 @@ export class reqManager extends GRequest {
     }
 
     private static execute(cmd: Request, req: req, resu: res): void {
-        let header = req.headers as { [key in string]: string };
+        let header = req.headers as json.objPersoType<string>;
         let body = req.body;
-        let linkVar = req.params as { [key in string]: string };
-        let query = req.query as { [key in string]: string };
+        let linkVar = req.params as json.objPersoType<string>;
+        let query = req.query as json.objPersoType<string>;
 
         var files: requ.fileArrayWithSharp = req.files as requ.fileArrayWithSharp;
       
@@ -274,14 +274,14 @@ export class reqManager extends GRequest {
     public static async executeDirect<T extends boolean>(link: string, callType: requ.callType, forceAuth: T, options: T extends true ? {
         body?: json.type,
         header?: undefined,
-        linkVar?: typeExt<json.type, { [key in string]: string }>,
-        query?: typeExt<json.type, { [key in string]: string }>,
+        linkVar?: typeExt<json.type, json.objPersoType<string>>,
+        query?: typeExt<json.type, json.objPersoType<string>>,
         files?: requ.fileArrayWithSharp
     } : {
         body?: json.type,
-        header?: typeExt<json.type, { [key in string]: string }>,
-        linkVar?: typeExt<json.type, { [key in string]: string }>,
-        query?: typeExt<json.type, { [key in string]: string }>,
+        header?: typeExt<json.type, json.objPersoType<string>>,
+        linkVar?: typeExt<json.type, json.objPersoType<string>>,
+        query?: typeExt<json.type, json.objPersoType<string>>,
         files?: requ.fileArrayWithSharp
     }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all } | { resFile: string, resCode: requ.httpCodes.all }> {
         let finded = false;

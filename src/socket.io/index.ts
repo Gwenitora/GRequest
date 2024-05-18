@@ -14,7 +14,7 @@ export class SocketIO extends GRequest {
     private static disconnection: ((socket: sockets) => void)[] = [];
     private static started: boolean = false;
     private static allSockets: sockets[];
-    private static channels: { [key: string]: sockets[] } = {};
+    private static channels: json.objPersoType<sockets[]> = {};
 
     /**
      * Initialize the SocketIO server
