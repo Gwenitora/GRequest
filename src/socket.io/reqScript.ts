@@ -1,5 +1,6 @@
 import { requ, Request } from "@gscript/grequest";
 import { json } from "@gscript/gtools";
+import { json_type } from "@gscript/gtools/lib/cjs/json/type";
 
 export class ReqScriptSocketIo extends Request {
     link: string = "/socketio/:file";
@@ -14,7 +15,7 @@ export class ReqScriptSocketIo extends Request {
         return true;
     }
     
-    async run(template: number, body: json.type, header: { [x: string]: string; }, linkVar: { [x: string]: string; }, query: { [x: string]: string; }): Promise<{ resFile: string; resCode: requ.httpCodes.all; }> {
-        return {resFile: "./node_modules/socket.io/client-dist/" + linkVar.file, resCode: requ.httpCodes._200_Success._200_OK};
+    async run(req: requ.requestContent): Promise<requ.requestResponse> {
+        return {resFile: "./node_modules/socket.io/client-dist/" + req.linkVar.file, resCode: requ.httpCodes._200_Success._200_OK};
     }
 }
