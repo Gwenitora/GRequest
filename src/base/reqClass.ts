@@ -62,13 +62,8 @@ export abstract class Request extends GRequest  {
     /**
      * Run is called when the request is execute, and conditions is respects (`auth`, `inTemplates`..).
      * 
-     * @param template The id of the template used, it's the index in the array in your `inTemplates`.
-     * @param body The body of the request (respect strictly a template of `inTemplates`).
-     * @param header The header of the request.
-     * @param linkVar If you have make variable in your link, you can get them here (example: `/mod/:id/version` => `{id: string}`).
-     * @param query also variables in your link but not previsible (optionnal) and with other format (example: `/hw?id=1` => `{version: string}`).
-     * @param files If you have files in your request, you can get them here.
+     * @param req The request content, with the body, the headers, the params, the query and the files.
      * @returns The response of the request, with the body response and the status code.
      */
-    abstract run(req: requ.requestContent): Promise<{resBody: json.type, resCode: requ.httpCodes.all} | {resFile: string, resCode: requ.httpCodes.all}>;
+    abstract run(req: requ.requestContent): Promise<requ.requestResponse>;
 }

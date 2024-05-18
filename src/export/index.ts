@@ -524,11 +524,34 @@ export namespace requ {
      * All the variables contents for a request
      */
     export interface requestContent {
+        /**
+         * The id of the template used, it's the index in the array in your `inTemplates`.
+         */
         template: number,
+        /**
+         * The body of the request (respect strictly a template of `inTemplates`).
+         */
         body: json.type,
+        /**
+         * The header of the request.
+         */
         header: typeExt<json.type, {[key in string] : string}>,
+        /**
+         * If you have make variable in your link, you can get them here (example: `/mod/:id/version` => `{id: string}`).
+         */
         linkVar: typeExt<json.type, {[key in string]: string}>,
+        /**
+         * also variables in your link but not previsible (optionnal) and with other format (example: `/hw?id=1` => `{version: string}`).
+         */
         query: typeExt<json.type, {[key in string]: string}>,
-        files: requ.fileArrayWithSharp
+        /**
+         * If you have files in your request, you can get them here.
+         */
+        files: fileArrayWithSharp
     }
+
+    /**
+     * The response of a request
+     */
+    export type requestResponse = {resBody: json.type, resCode: httpCodes.all} | {resFile: string, resCode: httpCodes.all};
 }
