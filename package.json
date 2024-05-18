@@ -23,6 +23,7 @@
   "homepage": "https://github.com/Gwenitora/GRequest#readme",
   "devDependencies": {
     "@gscript/grequest": "^1.1.43",
+    "@gscript/gscript": "^1.1.1",
     "node": "^22.2.0",
     "sharp": "^0.33.4",
     "typescript": "^5.4.5"
