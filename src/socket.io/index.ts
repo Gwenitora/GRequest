@@ -194,6 +194,18 @@ export class SocketIO extends GRequest {
         return channels;
     }
 
+    /**
+     * Get a socket with an id of socket
+     * 
+     * @param id The id of the socket
+     * @returns The socket with the id choosen, or null if not found
+     */
+    public static getSocketWithId(id: string) : sockets | null {
+        var sockets = SocketIO.allSockets.filter((s) => s.id === id);
+        if (sockets.length === 1) return sockets[0];
+        return null;
+    }
+
     private static connections(socket: sockets) {
         SocketIO.connection.forEach((func) => {
             func(socket);
