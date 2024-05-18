@@ -1,3 +1,4 @@
+import { json, typeExt } from "@gscript/gtools";
 import { UploadedFile } from "express-fileupload";
 import { Sharp } from "sharp";
 
@@ -518,4 +519,16 @@ export namespace requ {
      * The type of multiples files received on a form
      */
     export type fileArrayWithSharp = null | undefined | { [key in string]: UploadedFileWithSharp | UploadedFileWithSharp[] };
+
+    /**
+     * All the variables contents for a request
+     */
+    export interface requestContent {
+        template: number,
+        body: json.type,
+        header: typeExt<json.type, {[key in string] : string}>,
+        linkVar: typeExt<json.type, {[key in string]: string}>,
+        query: typeExt<json.type, {[key in string]: string}>,
+        files: requ.fileArrayWithSharp
+    }
 }

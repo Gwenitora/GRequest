@@ -335,7 +335,7 @@ export class reqManager extends GRequest {
         }
 
         try {
-            const result = await cmd.run(template, body, header, linkVar, query, files);
+            const result = await cmd.run({template, body, header, linkVar, query, files});
             if (result.hasOwnProperty("resFile")) {
                 readFileSync((result as any).resFile, "utf-8");
                 return result;

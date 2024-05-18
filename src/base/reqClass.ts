@@ -70,5 +70,5 @@ export abstract class Request extends GRequest  {
      * @param files If you have files in your request, you can get them here.
      * @returns The response of the request, with the body response and the status code.
      */
-    abstract run(template: number, body: json.type, header: typeExt<json.type, {[key in string] : string}>, linkVar: typeExt<json.type, {[key in string]: string}>, query: typeExt<json.type, {[key in string]: string}>, files: requ.fileArrayWithSharp): Promise<{resBody: json.type, resCode: requ.httpCodes.all} | {resFile: string, resCode: requ.httpCodes.all}>;
+    abstract run(req: requ.requestContent): Promise<{resBody: json.type, resCode: requ.httpCodes.all} | {resFile: string, resCode: requ.httpCodes.all}>;
 }
