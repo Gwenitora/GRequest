@@ -523,7 +523,7 @@ export namespace requ {
     /**
      * All the variables contents for a request
      */
-    export interface requestContent {
+    export type requestContent = {
         /**
          * The id of the template used, it's the index in the array in your `inTemplates`.
          */
