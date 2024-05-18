@@ -1,6 +1,5 @@
 import { requ, Request } from "@gscript/grequest";
 import { json } from "@gscript/gtools";
-import { json_type } from "@gscript/gtools/lib/cjs/json/type";
 
 export class ReqScriptSocketIo extends Request {
     link: string = "/socketio/:file";
