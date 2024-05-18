@@ -65,5 +65,5 @@ export abstract class Request extends GRequest  {
      * @param req The request content, with the body, the headers, the params, the query and the files.
      * @returns The response of the request, with the body response and the status code.
      */
-    abstract run(req: requ.requestContent): Promise<requ.requestResponse>;
+    abstract run(datas: requ.requestContent): Promise<requ.requestResponse>;
 }
