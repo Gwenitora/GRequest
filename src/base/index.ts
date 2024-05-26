@@ -1,10 +1,10 @@
 import { Request } from "./reqClass";
 import { GRequest } from "../GRequest";
-import { colors, debug, env, getClasses, img, json, Langs, typeExt } from "@gscript/gtools";
+import { colors, debug, env, getClasses, img, json, Langs, maths, typeExt } from "@gscript/gtools";
 import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
-import { readFileSync } from "fs";
+import { readFileSync, rmSync } from "fs";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
 
@@ -74,7 +74,7 @@ export class reqManager extends GRequest {
                         continue;
                     }
                     const datasSplit = datas[i].path.split("." + img.path());
-                    img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + "/img" + datasSplit.splice(1, datasSplit.length - 1).join("." + img.path()));
+                    img.editLink(datas[i].id, (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + "/img/auto" + datasSplit.splice(1, datasSplit.length - 1).join("." + img.path()));
                 }
             })
         }
@@ -142,22 +142,41 @@ export class reqManager extends GRequest {
             }
         }
 
-        reqManager.expressApp.get("/img/*", (req: req, resu: res) => {
-            let path = req.path.split("/img/").splice(1, req.path.split("/img/").length - 1).join("/img/");
-            let name = path.split('/')[path.split('/').length - 1];
-            name = name.split(".").splice(0, name.split(".").length - 1).join(".")
-            let ext = path.split(".").splice(path.split(".").length - 1)[0];
-            path = '/' + path;
-            path = path.split("").splice(1, path.split("").length - 1).join("");
+        reqManager.expressApp.get("/img/:type/*", async (req: req, resu: res) => {
+            const t = req.params.type;
+            var T = req.params.type === "png" || req.params.type === "jpg" || req.params.type === "jpeg" || req.params.type === "webp" ? req.params.type : "auto";
+            const TT = img.getExts().find((ext) => ext === T);
 
-            let Img = img.getImg(name, { ext, path });
+            const j = 1 + (T === 'auto' ? 0 : 1);
 
-            if (Img === undefined || Img[0].link.split(" ").length !== 1) {
-                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
-                return;
+            for (let i = 0; i < j; i++) {
+                let path = req.path.split("/img/" + t + '/').splice(1, req.path.split("/img/" + t + '/').length - 1).join("/img/" + t + '/');
+                let name = path.split('/')[path.split('/').length - 1];
+                name = name.split(".").splice(0, name.split(".").length - 1).join(".")
+                let ext = T === 'auto' ? path.split(".").splice(path.split(".").length - 1)[0] : T;
+                path = '/' + path;
+                path = path.split("").splice(1, path.split("").length - 1).join("");
+                path = path.split('.').splice(0, path.split('.').length -1).join('.');
+
+                let Img = img.getImg(name, { ext, path });
+                let ImgOther = img.getImg(name, { path });
+
+                if (i === 0 && Img !== undefined && Img[0].link.split(" ").length === 1) {
+                    resu.status(requ.httpCodes._200_Success._200_OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
+                    return;
+                } else if (i === 1 && TT !== undefined && ImgOther !== undefined && ImgOther.filter((e) => e.link.split(" ").length === 1).length >= 1) {
+                    ImgOther = ImgOther.filter((e) => e.link.split(" ").length === 1);
+                    const r = maths.randint(0, 1_000_000_000).toString();
+                    var shape = await sharp(ImgOther[0].path).toFormat(TT as "png" | "jpg" | "jpeg" | "webp").toFile('./' + r + '.tmp.' + TT);
+                    resu.status(requ.httpCodes._200_Success._200_OK).sendFile('' + r + '.tmp.' + TT, { root: __dirname + '/' + '../'.repeat(6) });
+                    setTimeout(() => {
+                        rmSync('./' + r + '.tmp.' + TT)
+                    }, 500)
+                    return;
+                }
+                T = 'auto';
             }
-
-            resu.status(requ.httpCodes._200_Success._200_OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
+            resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
         });
 
         reqManager.expressApp.get("/lang/:id", (req: req, resu: res) => {
