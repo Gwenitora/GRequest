@@ -153,13 +153,14 @@ export class reqManager extends GRequest {
                 let path = req.path.split("/img/" + t + '/').splice(1, req.path.split("/img/" + t + '/').length - 1).join("/img/" + t + '/');
                 let name = path.split('/')[path.split('/').length - 1];
                 name = name.split(".").splice(0, name.split(".").length - 1).join(".")
-                let ext = T === 'auto' ? path.split(".").splice(path.split(".").length - 1)[0] : T;
+                let EXT = path.split(".").splice(path.split(".").length - 1)[0]
+                let ext = T === 'auto' ? EXT : T;
                 path = '/' + path;
                 path = path.split("").splice(1, path.split("").length - 1).join("");
                 path = path.split('.').splice(0, path.split('.').length -1).join('.');
 
                 let Img = img.getImg(name, { ext, path });
-                let ImgOther = img.getImg(name, { path });
+                let ImgOther = img.getImg(name, { ext: EXT, path });
 
                 if (i === 0 && Img !== undefined && Img[0].link.split(" ").length === 1) {
                     resu.status(requ.httpCodes._200_Success._200_OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
