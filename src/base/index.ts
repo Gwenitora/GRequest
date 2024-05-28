@@ -7,6 +7,7 @@ import { requ } from "../export";
 import { readFileSync, rmSync } from "fs";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
+import cors from "cors";
 
 /**
  * For start, setup and manage Requests.
@@ -108,6 +109,7 @@ export class reqManager extends GRequest {
         reqManager.requests = getClasses(Request);
         this.expressApp.use(express.json());
         this.expressApp.use(fileUpload());
+        this.expressApp.use(cors());
 
         for (let i = 0; i < reqManager.requests.length; i++) {
             if (typeof reqManager.requests[i].authLevel === "string" && reqManager.authsFuncs[reqManager.requests[i].authLevel as string] === undefined) {
