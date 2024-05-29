@@ -1,6 +1,6 @@
 {
   "name": "@gscript/grequest",
-  "version": "1.1.50",
+  "version": "1.1.51",
   "description": "For easier request system",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/Gwenitora/GRequest#readme",
   "devDependencies": {
-    "@gscript/grequest": "^1.1.50",
+    "@gscript/grequest": "^1.1.51",
     "@gscript/gscript": "^1.1.1",
     "fs": "^0.0.1-security",
     "node": "^22.2.0",
