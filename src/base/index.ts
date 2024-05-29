@@ -14,7 +14,7 @@ import cors from "cors";
  */
 export class reqManager extends GRequest {
     private static requests: Request[] = [];
-    private static authsFuncs: json.objPersoType<(header: json.type) => boolean> = {};
+    private static authsFuncs: json.objPersoType<(header: json.type) => Promise<boolean>> = {};
     private static expressApp: express.Application = express();
     private static port: number;
     private static helper: boolean = false;
@@ -49,7 +49,7 @@ export class reqManager extends GRequest {
      * @param func The function to check if the user is allowed to use the command (with the header of the request as parameter, return true if the user is allowed, false otherwise).
      * @returns reqManager for chaining call.
      */
-    public static createAuthLevel(name: string, func: (header: json.type) => boolean): typeof reqManager {
+    public static createAuthLevel(name: string, func: (header: json.type) => Promise<boolean>): typeof reqManager {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.authsFuncs[name] = func;
         return reqManager;
@@ -333,7 +333,7 @@ export class reqManager extends GRequest {
         if (files === undefined) files = {};
 
         if (!forceAuth) {
-            if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !reqManager.authsFuncs[cmd.authLevel](header))) {
+            if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !(await reqManager.authsFuncs[cmd.authLevel](header)))) {
                 if (cmd.secret === true || (cmd.secret as { command: boolean }).command === true || (cmd.secret as { helper: boolean }).helper === false) {
                     return { resBody: "Command not found", resCode: requ.httpCodes._400_ClientError._404_NotFound };
                 } else {
