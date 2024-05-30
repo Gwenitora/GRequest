@@ -144,7 +144,7 @@ export class reqManager extends GRequest {
                         inTemplates: reqManager.requests[i].inTemplates,
                         outTemplates: reqManager.requests[i].outTemplates
                     }
-                    resu.status(requ.httpCodes._200_Success._200_OK).json(help).send();
+                    resu.status(requ.httpCodes._200_Success._200_OK).json(help);
                 });
             }
         }
@@ -184,7 +184,7 @@ export class reqManager extends GRequest {
                 }
                 T = 'auto';
             }
-            resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
+            resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found");
         });
 
         reqManager.expressApp.get("/lang/:id", (req: req, resu: res) => {
@@ -204,15 +204,15 @@ export class reqManager extends GRequest {
                 lang = Langs.getLang({ lg_RG: id });
             }
             if (lang === undefined) {
-                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
+                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found");
                 return;
             }
-            resu.status(requ.httpCodes._200_Success._200_OK).json(lang).send();
+            resu.status(requ.httpCodes._200_Success._200_OK).json(lang);
         });
 
         for (const call in requ.callType) {
             reqManager.expressApp[requ.callType[call as keyof typeof requ.callType]]("*", (req: req, resu: res) => {
-                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
+                resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found");
             });
         }
 
@@ -286,7 +286,7 @@ export class reqManager extends GRequest {
             } else {
                 resu.json((result as any).resBody);
             }
-            resu.status(result.resCode).send();
+            resu.status(result.resCode);
         });
     }
 
