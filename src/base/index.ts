@@ -436,8 +436,8 @@ export class reqManager extends GRequest {
                     .replaceAll("{{callType}}", cmd.callType)
                     .replaceAll("{{code}}", result.resCode.toString())
                     .replaceAll("{{codeName}}", requ.httpCodes.codeToName(result.resCode))
-                    .replaceAll("{{codeCol}}", result.resCode >= 100 && result.resCode < 600 ? (result.resCode < 200 ? colors.fg.cyan : (result.resCode < 300 ? colors.fg.green : (result.resCode < 400 ? colors.fg.cyan : colors.fg.red))) : '' + result.resCode.toString())
-                    .replaceAll("{{codeNameCol}}", result.resCode >= 100 && result.resCode < 600 ? (result.resCode < 200 ? colors.fg.cyan : (result.resCode < 300 ? colors.fg.green : (result.resCode < 400 ? colors.fg.cyan : colors.fg.red))) : '' + requ.httpCodes.codeToName(result.resCode))
+                    .replaceAll("{{codeCol}}", (result.resCode >= 100 && result.resCode < 600 ? (result.resCode < 200 ? colors.fg.cyan : (result.resCode < 300 ? colors.fg.green : (result.resCode < 400 ? colors.fg.cyan : colors.fg.red))) : '') + result.resCode.toString())
+                    .replaceAll("{{codeNameCol}}", (result.resCode >= 100 && result.resCode < 600 ? (result.resCode < 200 ? colors.fg.cyan : (result.resCode < 300 ? colors.fg.green : (result.resCode < 400 ? colors.fg.cyan : colors.fg.red))) : '') + requ.httpCodes.codeToName(result.resCode))
                     .replaceAll("{{file}}", result.hasOwnProperty("resFile") ? 'true' : 'false')
                     .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
                 );
