@@ -22,7 +22,10 @@ export class reqManager extends GRequest {
     private static feedback: {
         start?: string,
         run?: string
-    } = {};
+    } = {
+        start: `${colors.fg.cyan}Cammand started: ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}}`,
+        run: `${colors.fg.white}Command ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}} ${colors.fg.white}executed by ${colors.fg.magenta}{{ip}} ${colors.fg.white}with code {{codeCol}} ${colors.fg.white}({{codeNameCol}}${colors.fg.white}) and return file ? ${colors.fg.red}{{file}}`
+    };
 
     /**
      * getter for express app
@@ -126,9 +129,12 @@ export class reqManager extends GRequest {
      * - `{{fullLink}}` for the full link of the request.
      * - `{{link}}` for the link of the request.
      * - `{{callType}}` for the call type of the request (GET, POST, PUT, PATCH or DELETE).
-     * - `{{resCode}}` for the response code of the request.
-     * - `{{resCodeName}}` for the response code name of the request.
+     * - `{{code}}` for the response code of the request.
+     * - `{{codeName}}` for the response code name of the request.
+     * - `{{codeCol}}` for the response code of the request (with a color depending the code, cyan for 100 and 300, green for 200 and red for 400 and 500).
+     * - `{{codeNameCol}}` for the response code name of the request (with a color depending the code, cyan for 100 and 300, green for 200 and red for 400 and 500).
      * - `{{file}}` for the response is a file or not.
+     * - `{{ip}}` for the ip of the user.
      * 
      * @param feedback The message to display when a request is executed.
      * @returns reqManager for chaining call.
@@ -221,12 +227,40 @@ export class reqManager extends GRequest {
                 let ImgOther = img.getImg(name, { ext: EXT, path });
 
                 if (i === 0 && Img !== undefined && Img[0].link.split(" ").length === 1) {
+                    if (reqManager.feedback.run !== undefined) {
+                        debug.log(
+                            reqManager.feedback.run
+                            .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                            .replaceAll("{{link}}", req.path)
+                            .replaceAll("{{callType}}", 'get')
+                            .replaceAll("{{code}}", '200')
+                            .replaceAll("{{codeName}}", requ.httpCodes.codeToName(200))
+                            .replaceAll("{{codeCol}}", colors.fg.green + '200')
+                            .replaceAll("{{codeNameCol}}", colors.fg.green + requ.httpCodes.codeToName(200))
+                            .replaceAll("{{file}}", 'true')
+                            .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
+                        );
+                    }
                     resu.status(requ.httpCodes._200_Success._200_OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
                     return;
                 } else if (i === 1 && TT !== undefined && ImgOther !== undefined && ImgOther.filter((e) => e.link.split(" ").length === 1).length >= 1) {
                     ImgOther = ImgOther.filter((e) => e.link.split(" ").length === 1);
                     const r = maths.randint(0, 1_000_000_000).toString();
                     var shape = await sharp(ImgOther[0].path).toFormat(TT as "png" | "jpg" | "jpeg" | "webp").toFile('./' + r + '.tmp.' + TT);
+                    if (reqManager.feedback.run !== undefined) {
+                        debug.log(
+                            reqManager.feedback.run
+                            .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                            .replaceAll("{{link}}", req.path)
+                            .replaceAll("{{callType}}", 'get')
+                            .replaceAll("{{code}}", '200')
+                            .replaceAll("{{codeName}}", requ.httpCodes.codeToName(200))
+                            .replaceAll("{{codeCol}}", colors.fg.green + '200')
+                            .replaceAll("{{codeNameCol}}", colors.fg.green + requ.httpCodes.codeToName(200))
+                            .replaceAll("{{file}}", 'true')
+                            .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
+                        );
+                    }
                     resu.status(requ.httpCodes._200_Success._200_OK).sendFile('' + r + '.tmp.' + TT, { root: __dirname + '/' + '../'.repeat(6) });
                     setTimeout(() => {
                         rmSync('./' + r + '.tmp.' + TT)
@@ -234,6 +268,20 @@ export class reqManager extends GRequest {
                     return;
                 }
                 T = 'auto';
+            }
+            if (reqManager.feedback.run !== undefined) {
+                debug.log(
+                    reqManager.feedback.run
+                    .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                    .replaceAll("{{link}}", req.path)
+                    .replaceAll("{{callType}}", 'get')
+                    .replaceAll("{{code}}", '404')
+                    .replaceAll("{{codeName}}", requ.httpCodes.codeToName(404))
+                    .replaceAll("{{codeCol}}", colors.fg.red + '404')
+                    .replaceAll("{{codeNameCol}}", colors.fg.red + requ.httpCodes.codeToName(404))
+                    .replaceAll("{{file}}", 'false')
+                    .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
+                );
             }
             resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found");
         });
@@ -255,14 +303,56 @@ export class reqManager extends GRequest {
                 lang = Langs.getLang({ lg_RG: id });
             }
             if (lang === undefined) {
+                if (reqManager.feedback.run !== undefined) {
+                    debug.log(
+                        reqManager.feedback.run
+                        .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + '/lang/' + id)
+                        .replaceAll("{{link}}", '/lang/' + id)
+                        .replaceAll("{{callType}}", 'get')
+                        .replaceAll("{{code}}", '400')
+                        .replaceAll("{{codeName}}", requ.httpCodes.codeToName(400))
+                        .replaceAll("{{codeCol}}", colors.fg.red + '400')
+                        .replaceAll("{{codeNameCol}}", colors.fg.red + requ.httpCodes.codeToName(400))
+                        .replaceAll("{{file}}", 'false')
+                        .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
+                    );
+                }
                 resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found");
                 return;
+            }
+            if (reqManager.feedback.run !== undefined) {
+                debug.log(
+                    reqManager.feedback.run
+                    .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + '/lang/' + id)
+                    .replaceAll("{{link}}", '/lang/' + id)
+                    .replaceAll("{{callType}}", 'get')
+                    .replaceAll("{{code}}", '200')
+                    .replaceAll("{{codeName}}", requ.httpCodes.codeToName(200))
+                    .replaceAll("{{codeCol}}", colors.fg.green + '200')
+                    .replaceAll("{{codeNameCol}}", colors.fg.green + requ.httpCodes.codeToName(200))
+                    .replaceAll("{{file}}", 'false')
+                    .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
+                );
             }
             resu.status(requ.httpCodes._200_Success._200_OK).json(lang);
         });
 
         for (const call in requ.callType) {
             reqManager.expressApp[requ.callType[call as keyof typeof requ.callType]]("*", (req: req, resu: res) => {
+                if (reqManager.feedback.run !== undefined) {
+                    debug.log(
+                        reqManager.feedback.run
+                        .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                        .replaceAll("{{link}}", req.path)
+                        .replaceAll("{{callType}}", requ.callType[call as keyof typeof requ.callType])
+                        .replaceAll("{{code}}", '404')
+                        .replaceAll("{{codeName}}", requ.httpCodes.codeToName(404))
+                        .replaceAll("{{codeCol}}", colors.fg.red + '404')
+                        .replaceAll("{{codeNameCol}}", colors.fg.red + requ.httpCodes.codeToName(404))
+                        .replaceAll("{{file}}", 'true')
+                        .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
+                    );
+                }
                 resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found");
             });
         }
@@ -344,9 +434,12 @@ export class reqManager extends GRequest {
                     .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + cmd.link)
                     .replaceAll("{{link}}", cmd.link)
                     .replaceAll("{{callType}}", cmd.callType)
-                    .replaceAll("{{resCode}}", result.resCode.toString())
-                    .replaceAll("{{resCodeName}}", requ.httpCodes.codeToName(result.resCode))
+                    .replaceAll("{{code}}", result.resCode.toString())
+                    .replaceAll("{{codeName}}", requ.httpCodes.codeToName(result.resCode))
+                    .replaceAll("{{codeCol}}", result.resCode >= 100 && result.resCode < 600 ? (result.resCode < 200 ? colors.fg.cyan : (result.resCode < 300 ? colors.fg.green : (result.resCode < 400 ? colors.fg.cyan : colors.fg.red))) : '' + result.resCode.toString())
+                    .replaceAll("{{codeNameCol}}", result.resCode >= 100 && result.resCode < 600 ? (result.resCode < 200 ? colors.fg.cyan : (result.resCode < 300 ? colors.fg.green : (result.resCode < 400 ? colors.fg.cyan : colors.fg.red))) : '' + requ.httpCodes.codeToName(result.resCode))
                     .replaceAll("{{file}}", result.hasOwnProperty("resFile") ? 'true' : 'false')
+                    .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
                 );
             }
         });
