@@ -124,7 +124,12 @@ export class reqManager extends GRequest {
             if (reqManager.requests[i].type === requ.type.PRIVATE) continue;
 
             reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link, (requ: req, resu: res) => {
-                reqManager.execute(reqManager.requests[i], requ, resu);
+                try {
+                    reqManager.execute(reqManager.requests[i], requ, resu);
+                } catch (err) {
+                    debug.logErr("Internal server error due to bad request in " + reqManager.requests[i].link + " command");
+                    debug.logErr(`${colors.fg.yellow}The error is : ${colors.fg.red}${err}`)
+                }
             });
 
             if (reqManager.requests[i].secret === true || (reqManager.requests[i].secret as { command: boolean }).command === false || (reqManager.requests[i].secret as { helper: boolean }).helper === true) continue;
@@ -274,6 +279,7 @@ export class reqManager extends GRequest {
                     resu.sendFile((result as any).resFile, { root: __dirname + '/' + '../'.repeat(6) });
                 } catch (err) {
                     debug.logErr("Internal server error due to bad file in " + cmd.link + " command");
+                    debug.logErr(`${colors.fg.yellow}The error is : ${colors.fg.red}${err}`)
                     resu.json("Internal server error")
                     result.resCode = 500;
                 }
@@ -370,6 +376,7 @@ export class reqManager extends GRequest {
             return { resBody: "Internal server error", resCode: requ.httpCodes._500_ServerError._500_InternalServerError };
         } catch (err) {
             debug.logErr("Internal server error due to promise rejection in " + cmd.link + " command");
+            debug.logErr(`${colors.fg.yellow}The error is : ${colors.fg.red}${err}`)
             return { resBody: "Internal server error", resCode: requ.httpCodes._500_ServerError._500_InternalServerError };
         }
     }
