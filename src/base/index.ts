@@ -19,6 +19,10 @@ export class reqManager extends GRequest {
     private static port: number;
     private static helper: boolean = false;
     private static langActive: boolean = false;
+    private static feedback: {
+        start?: string,
+        run?: string
+    } = {};
 
     /**
      * getter for express app
@@ -97,6 +101,43 @@ export class reqManager extends GRequest {
         this.langActive = value;
         return reqManager;
     }
+    
+    /**
+     * Set the message to display when a request is started.
+     * you can make parameters:
+     * - `{{fullLink}}` for the full link of the request.
+     * - `{{link}}` for the link of the request.
+     * - `{{type}}` for the type of the request (public or private).
+     * - `{{callType}}` for the call type of the request (GET, POST, PUT, PATCH or DELETE).
+     * - `{{authLevel}}` for the auth level of the request.
+     * 
+     * @param feedback The message to display when a request is started.
+     * @returns reqManager for chaining call.
+     */
+    public static setStartFeedback(feedback?: string): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
+        reqManager.feedback.start = feedback;
+        return reqManager;
+    }
+
+    /**
+     * Set the message to display when a request is executed.
+     * you can make parameters:
+     * - `{{fullLink}}` for the full link of the request.
+     * - `{{link}}` for the link of the request.
+     * - `{{callType}}` for the call type of the request (GET, POST, PUT, PATCH or DELETE).
+     * - `{{resCode}}` for the response code of the request.
+     * - `{{resCodeName}}` for the response code name of the request.
+     * - `{{file}}` for the response is a file or not.
+     * 
+     * @param feedback The message to display when a request is executed.
+     * @returns reqManager for chaining call.
+     */
+    public static setRunFeedback(feedback?: string): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
+        reqManager.feedback.run = feedback;
+        return reqManager;
+    }
 
     /**
      * To setup all detect requests (execute the start method of all requests, and save it all of them).
@@ -117,6 +158,16 @@ export class reqManager extends GRequest {
             }
             if (!reqManager.requests[i].start()) {
                 throw new Error("Request " + reqManager.requests[i].link + " failed to start");
+            }
+            if (reqManager.feedback.start !== undefined) {
+                debug.log(
+                    reqManager.feedback.start
+                    .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + reqManager.requests[i].link)
+                    .replaceAll("{{link}}", reqManager.requests[i].link)
+                    .replaceAll("{{type}}", reqManager.requests[i].type)
+                    .replaceAll("{{callType}}", reqManager.requests[i].callType)
+                    .replaceAll("{{authLevel}}", typeof reqManager.requests[i].authLevel === 'boolean' ? (reqManager.requests[i].authLevel ? 'true' : 'false') : reqManager.requests[i].authLevel as string)
+                );
             }
         }
 
@@ -287,6 +338,17 @@ export class reqManager extends GRequest {
                 resu.json((result as any).resBody);
             }
             resu.status(result.resCode);
+            if (reqManager.feedback.run !== undefined) {
+                debug.log(
+                    reqManager.feedback.run
+                    .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + cmd.link)
+                    .replaceAll("{{link}}", cmd.link)
+                    .replaceAll("{{callType}}", cmd.callType)
+                    .replaceAll("{{resCode}}", result.resCode.toString())
+                    .replaceAll("{{resCodeName}}", requ.httpCodes.codeToName(result.resCode))
+                    .replaceAll("{{file}}", result.hasOwnProperty("resFile") ? 'true' : 'false')
+                );
+            }
         });
     }
 

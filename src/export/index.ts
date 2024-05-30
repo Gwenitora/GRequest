@@ -64,6 +64,22 @@ export namespace requ {
          */
         export type all = _100_Information | _200_Success | _300_Redirection | _400_ClientError | _500_ServerError;
 
+        export const codeToName = (code: all): string => {
+            if (code >= 100 && code <= 199) {
+                return `Information : ${requ.httpCodes._100_Information[code].split('_')[2]}`;
+            } else if (code >= 200 && code <= 299) {
+                return `Success : ${requ.httpCodes._200_Success[code].split('_')[2]}`;
+            } else if (code >= 300 && code <= 399) {
+                return `Redirection : ${requ.httpCodes._300_Redirection[code].split('_')[2]}`;
+            } else if (code >= 400 && code <= 499) {
+                return `Client Error : ${requ.httpCodes._400_ClientError[code].split('_')[2]}`;
+            } else if (code >= 500 && code <= 599) {
+                return `Server Error : ${requ.httpCodes._500_ServerError[code].split('_')[2]}`;
+            } else {
+                return `Unknown : ${code}`;
+            }
+        };
+
         /**
          * This codes are for information
          */
