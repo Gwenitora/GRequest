@@ -14,7 +14,7 @@ import cors from "cors";
  */
 export class reqManager extends GRequest {
     private static requests: Request[] = [];
-    private static authsFuncs: json.objPersoType<(header: json.type) => Promise<boolean>> = {};
+    private static authsFuncs: json.objPersoType<(header: requ.requestContent) => Promise<boolean>> = {};
     private static expressApp: express.Application = express();
     private static port: number;
     private static helper: boolean = false;
@@ -56,7 +56,7 @@ export class reqManager extends GRequest {
      * @param func The function to check if the user is allowed to use the command (with the header of the request as parameter, return true if the user is allowed, false otherwise).
      * @returns reqManager for chaining call.
      */
-    public static createAuthLevel(name: string, func: (header: json.type) => Promise<boolean>): typeof reqManager {
+    public static createAuthLevel(name: string, func: (header: requ.requestContent) => Promise<boolean>): typeof reqManager {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.authsFuncs[name] = func;
         return reqManager;
@@ -505,8 +505,21 @@ export class reqManager extends GRequest {
         if (query === undefined) query = {};
         if (files === undefined) files = {};
 
+        for (let i = 0; i < cmd.inTemplates.length; i++) {
+            if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
+            body = json.IsRespectTemplate(body, cmd.inTemplates[i], true) as any;
+            template = i;
+            break;
+        }
+
+        if (cmd.inTemplates.length === 0) {
+            body = undefined;
+        }
+
+        const reqForAuth = { template : json.clone(template), body : json.clone(body), header, linkVar : json.clone(linkVar), query : json.clone(query), files: undefined } as requ.requestContent;
+
         if (!forceAuth) {
-            if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !(await reqManager.authsFuncs[cmd.authLevel](header)))) {
+            if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !(await reqManager.authsFuncs[cmd.authLevel](reqForAuth)))) {
                 if (cmd.secret === true || (cmd.secret as { command: boolean }).command === true || (cmd.secret as { helper: boolean }).helper === false) {
                     return { resBody: "Command not found", resCode: requ.httpCodes._400_ClientError._404_NotFound };
                 } else {
@@ -515,18 +528,8 @@ export class reqManager extends GRequest {
             }
         }
 
-        for (let i = 0; i < cmd.inTemplates.length; i++) {
-            if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
-            body = json.IsRespectTemplate(body, cmd.inTemplates[i], true) as any;
-            template = i;
-            break;
-        }
-
         if (template === -1 && cmd.inTemplates.length > 0) {
             return { resBody: "Bad request", resCode: requ.httpCodes._400_ClientError._400_BadRequest };
-        }
-        if (cmd.inTemplates.length === 0) {
-            body = undefined;
         }
 
         try {
