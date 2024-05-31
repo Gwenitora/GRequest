@@ -6,6 +6,7 @@ export class ReqScriptSocketIo extends Request {
     type: requ.type = requ.type.PUBLIC;
     callType: requ.callType = requ.callType.GET;
     authLevel: string | boolean = true;
+    inImgs: json.objPersoType<boolean, false> = {};
     inTemplates: json.template[] = [];
     outTemplates: json.template[] = [];
     secret: boolean = false;
