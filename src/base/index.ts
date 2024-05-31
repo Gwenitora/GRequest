@@ -426,6 +426,8 @@ export class reqManager extends GRequest {
             }
         }
 
+        files = newFiles;
+
         reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query, files }).then((result) => {
             if (result.hasOwnProperty("resFile")) {
                 try {
