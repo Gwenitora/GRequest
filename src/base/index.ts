@@ -420,7 +420,7 @@ export class reqManager extends GRequest {
                 if ((files === undefined || (files as any)[key] === undefined) && cmd.inImgs[key] === true) {
                     resu.status(requ.httpCodes._400_ClientError._400_BadRequest).json("Bad request");
                     return;
-                } else if ((files === undefined || (files as any)[key] !== undefined)) {
+                } else if (files !== undefined && (files as any)[key] !== undefined) {
                     newFiles[key] = (files as any)[key];
                 }
             }
