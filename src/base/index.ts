@@ -306,8 +306,8 @@ export class reqManager extends GRequest {
                 if (reqManager.feedback.run !== undefined) {
                     debug.log(
                         reqManager.feedback.run
-                            .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + '/lang/' + id)
-                            .replaceAll("{{link}}", '/lang/' + id)
+                            .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                            .replaceAll("{{link}}", req.path)
                             .replaceAll("{{callType}}", 'get')
                             .replaceAll("{{code}}", '400')
                             .replaceAll("{{codeName}}", requ.httpCodes.codeToName(400))
@@ -323,8 +323,8 @@ export class reqManager extends GRequest {
             if (reqManager.feedback.run !== undefined) {
                 debug.log(
                     reqManager.feedback.run
-                        .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + '/lang/' + id)
-                        .replaceAll("{{link}}", '/lang/' + id)
+                        .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                        .replaceAll("{{link}}", req.path)
                         .replaceAll("{{callType}}", 'get')
                         .replaceAll("{{code}}", '200')
                         .replaceAll("{{codeName}}", requ.httpCodes.codeToName(200))
@@ -443,8 +443,8 @@ export class reqManager extends GRequest {
             if (reqManager.feedback.run !== undefined) {
                 debug.log(
                     reqManager.feedback.run
-                        .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + cmd.link)
-                        .replaceAll("{{link}}", cmd.link)
+                        .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                        .replaceAll("{{link}}", req.path)
                         .replaceAll("{{callType}}", cmd.callType)
                         .replaceAll("{{code}}", result.resCode.toString())
                         .replaceAll("{{codeName}}", requ.httpCodes.codeToName(result.resCode))
