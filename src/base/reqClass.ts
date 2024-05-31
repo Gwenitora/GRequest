@@ -35,6 +35,14 @@ export abstract class Request extends GRequest  {
      */
     abstract authLevel: string | boolean;
     /**
+     * If you want to use images in your request, you can define the images here.
+     * 
+     * true if is needed.
+     * false if facultative.
+     * others is destroyed.
+     */
+    abstract inImgs: json.objPersoType<boolean>;
+    /**
      * Templates of the request.
      * You can make multiple templates for the request.
      * The id of template is the index in the array, this id is send to you when a request is execute.
