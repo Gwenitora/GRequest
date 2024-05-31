@@ -24,7 +24,7 @@ export class reqManager extends GRequest {
         run?: string
     } = {
             start: `${colors.fg.cyan}Cammand started: ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}}`,
-            run: `${colors.fg.white}Command ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}} ${colors.fg.white}executed by ${colors.fg.magenta}{{ip}} ${colors.fg.white}with code {{codeCol}} ${colors.fg.white}({{codeNameCol}}${colors.fg.white}) and return file ? ${colors.fg.red}{{file}}`
+            run: `${colors.fg.white}Command ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}} ${colors.fg.white}executed by ${colors.fg.magenta}{{ip}} ${colors.fg.white}with code {{codeCol}} ${colors.fg.white}({{codeNameCol}}${colors.fg.white}) and return file ? ${colors.fg.gray}{{file}}`
         };
 
     /**
