@@ -170,7 +170,7 @@ export class reqManager extends GRequest {
         reqManager.serv = serv;
         reqManager.servIO = new ServerIO(serv, {
             cors: {
-                origin: "https://127.0.0.1",
+                origin: "*",
                 methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
             }
         });

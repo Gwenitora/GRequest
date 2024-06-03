@@ -13,7 +13,7 @@ export class SocketIO extends GRequest {
     private static connection: ((socket: sockets) => void)[] = [];
     private static disconnection: ((socket: sockets) => void)[] = [];
     private static started: boolean = false;
-    private static allSockets: sockets[];
+    private static allSockets: sockets[] = [];
     private static channels: json.objPersoType<sockets[]> = {};
 
     /**
