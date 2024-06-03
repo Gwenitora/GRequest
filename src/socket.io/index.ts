@@ -1,7 +1,7 @@
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { GRequest } from '../GRequest';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { env, json } from '@gscript/gtools';
+import { json } from '@gscript/gtools';
 import { reqManager } from '@gscript/grequest';
 
 export type sockets = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;

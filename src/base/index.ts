@@ -168,7 +168,12 @@ export class reqManager extends GRequest {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         const serv = createServer(reqManager.expressApp)
         reqManager.serv = serv;
-        reqManager.servIO = new ServerIO(serv);
+        reqManager.servIO = new ServerIO(serv, {
+            cors: {
+                origin: "https://127.0.0.1",
+                methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+            }
+        });
         reqManager.requests = getClasses(Request);
         this.expressApp.use(express.json());
         this.expressApp.use(fileUpload());
