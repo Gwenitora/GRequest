@@ -8,8 +8,8 @@ import { readFileSync, rmSync } from "fs";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
 import cors from "cors";
-import { createServer } from "http";
-import { Server } from "socket.io";
+import { createServer, Server } from "http";
+import { Server as ServerIO } from "socket.io";
 
 /**
  * For start, setup and manage Requests.
@@ -29,14 +29,15 @@ export class reqManager extends GRequest {
             run: `${colors.fg.white}Command ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}} ${colors.fg.white}executed by ${colors.fg.magenta}{{ip}} ${colors.fg.white}with code {{codeCol}} ${colors.fg.white}({{codeNameCol}}${colors.fg.white}) and return file ? ${colors.fg.gray}{{file}}`
     };
     private static serv : Server;
+    private static servIO : ServerIO;
 
     /**
      * getter for the serv of the application
      * 
      * @returns the serv of the application
      */
-    public static get Server() : Server {
-        return reqManager.serv;
+    public static get Server() : ServerIO {
+        return reqManager.servIO;
     }
 
     /**
@@ -165,6 +166,9 @@ export class reqManager extends GRequest {
      */
     public static init(): typeof reqManager {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
+        const serv = createServer(reqManager.expressApp)
+        reqManager.serv = serv;
+        reqManager.servIO = new ServerIO(serv);
         reqManager.requests = getClasses(Request);
         this.expressApp.use(express.json());
         this.expressApp.use(fileUpload());
@@ -384,9 +388,7 @@ export class reqManager extends GRequest {
      */
     public static start(message?: string): void {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
-        const serv = createServer(reqManager.expressApp)
-        reqManager.serv = new Server(serv);
-        serv.listen(reqManager.port, () => {
+        reqManager.serv.listen(reqManager.port, () => {
             if (message !== undefined) {
                 if (message === "") return;
                 debug.log(message.replaceAll("{{port}}", reqManager.port.toString()));
