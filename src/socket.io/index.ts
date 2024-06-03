@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { GRequest } from '../GRequest';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { json } from '@gscript/gtools';
+import { env, json } from '@gscript/gtools';
 
 export type sockets = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
@@ -35,7 +35,7 @@ export class SocketIO extends GRequest {
     public static start(): typeof SocketIO {
         if (SocketIO.started) return SocketIO;
         SocketIO.started = true;
-        SocketIO.io.listen(3000);
+        SocketIO.io.listen(env.API_PORT ? parseInt(env.API_PORT) +1 : 3001);
         SocketIO.io.on('connection', SocketIO.connections);
         return SocketIO
     }
