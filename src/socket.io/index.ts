@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { GRequest } from '../GRequest';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { env, json } from '@gscript/gtools';
+import { reqManager } from '@gscript/grequest';
 
 export type sockets = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
@@ -9,7 +10,6 @@ export type sockets = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMa
  * Class SocketIO for send datas to the clients, or to create funnel between clients
  */
 export class SocketIO extends GRequest {
-    private static io: Server;
     private static connection: ((socket: sockets) => void)[] = [];
     private static disconnection: ((socket: sockets) => void)[] = [];
     private static started: boolean = false;
@@ -17,26 +17,15 @@ export class SocketIO extends GRequest {
     private static channels: json.objPersoType<sockets[]> = {};
 
     /**
-     * Initialize the SocketIO server
-     * 
-     * @returns The SocketIO server to chain the methods
-     */
-    public static init() : typeof SocketIO {
-        if (SocketIO.started) return SocketIO;
-        SocketIO.io = new Server();
-        return SocketIO
-    }
-
-    /**
      * Start the sockets readers
      * 
      * @returns The SocketIO server to chain the methods
      */
     public static start(): typeof SocketIO {
+        const serv = reqManager.Server;
         if (SocketIO.started) return SocketIO;
         SocketIO.started = true;
-        SocketIO.io.listen(env.API_PORT ? parseInt(env.API_PORT) +1 : 3001);
-        SocketIO.io.on('connection', SocketIO.connections);
+        serv.on('connection', SocketIO.connections);
         return SocketIO
     }
 
