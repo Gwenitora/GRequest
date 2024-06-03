@@ -2,7 +2,7 @@ import { requ, Request } from "@gscript/grequest";
 import { json } from "@gscript/gtools";
 
 export class ReqScriptSocketIo extends Request {
-    link: string = "/socket.io/:file";
+    link: string = "/socketio/:file";
     type: requ.type = requ.type.PUBLIC;
     callType: requ.callType = requ.callType.GET;
     authLevel: string | boolean = true;
