@@ -438,7 +438,7 @@ export class reqManager extends GRequest {
         var newFiles: requ.fileArrayWithSharp = {};
         for (let key in cmd.inImgs) {
             if (cmd.inImgs[key] !== undefined) {
-                if ((files === undefined || files === null || (files as any)[key] === undefined) && cmd.inImgs[key] === true) {
+                if ((files === null || files === undefined || (files as any)[key] === undefined) && cmd.inImgs[key] === true) {
                     resu.status(requ.httpCodes._400_ClientError._400_BadRequest).json("Bad request");
                     return;
                 } else if (files !== undefined && (files as any)[key] !== undefined) {
