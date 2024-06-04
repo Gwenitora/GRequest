@@ -243,9 +243,16 @@ export class reqManager extends GRequest {
                 path = '/' + path;
                 path = path.split("").splice(1, path.split("").length - 1).join("");
                 path = path.split('.').splice(0, path.split('.').length - 1).join('.');
+                var tmpPath = path.split(".").splice(0, name.split(".").length - 1).join(".") + '.tmp.' + EXT;
 
                 let Img = img.getImg(name, { ext, path });
                 let ImgOther = img.getImg(name, { ext: EXT, path });
+                let Img2 = img.getImg(name + '.tmp', { ext, path: tmpPath });
+                let ImgOther2 = img.getImg(name + '.tmp', { ext: EXT, path: tmpPath });
+                if (Img2 !== undefined && Img === undefined) Img = Img2;
+                if (ImgOther2 !== undefined && ImgOther === undefined) ImgOther = ImgOther2;
+                if (Img2 !== undefined && Img !== undefined) Img = [...Img, ...Img2];
+                if (ImgOther2 !== undefined && ImgOther !== undefined) ImgOther = [...ImgOther, ...ImgOther2];
 
                 if (i === 0 && Img !== undefined && Img[0].link.split(" ").length === 1) {
                     if (reqManager.feedback.run !== undefined) {
