@@ -450,6 +450,7 @@ export class reqManager extends GRequest {
         files = newFiles;
 
         reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query, files }).then((result) => {
+            resu.status(result.resCode);
             if (result.hasOwnProperty("resFile")) {
                 try {
                     resu.sendFile((result as any).resFile, { root: __dirname + '/' + '../'.repeat(6) });
@@ -462,7 +463,6 @@ export class reqManager extends GRequest {
             } else {
                 resu.json((result as any).resBody);
             }
-            resu.status(result.resCode);
             if (reqManager.feedback.run !== undefined) {
                 debug.log(
                     reqManager.feedback.run
