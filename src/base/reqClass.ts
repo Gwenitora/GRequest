@@ -74,4 +74,20 @@ export abstract class Request extends GRequest  {
      * @returns The response of the request, with the body response and the status code.
      */
     abstract run(datas: requ.requestContent): Promise<requ.requestResponse>;
+
+    private actif: boolean = false;
+
+    /**
+     * is active ?
+     */
+    public get Actif(): boolean {
+        return this.actif;
+    }
+
+    /**
+     * Set the active state of the request.
+     */
+    public set Actif(actif: boolean) {
+        this.actif = actif;
+    }
 }

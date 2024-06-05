@@ -1,4 +1,4 @@
-import { requ, Request } from "@gscript/grequest";
+import { reqManager, requ, Request } from "@gscript/grequest";
 import { json } from "@gscript/gtools";
 
 export class ReqScriptSocketIo extends Request {
@@ -12,7 +12,7 @@ export class ReqScriptSocketIo extends Request {
     secret: boolean = false;
 
     start(): boolean {
-        return true;
+        return reqManager.SocketActif;
     }
     
     async run(req: requ.requestContent): Promise<requ.requestResponse> {

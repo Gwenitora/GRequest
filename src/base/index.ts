@@ -21,22 +21,30 @@ export class reqManager extends GRequest {
     private static port: number;
     private static helper: boolean = false;
     private static langActive: boolean = false;
+    private static socketActif: boolean = false;
     private static feedback: {
         start?: string,
         run?: string
     } = {
             start: `${colors.fg.cyan}Command started: ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}}`,
             run: `${colors.fg.white}Command ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}} ${colors.fg.white}executed by ${colors.fg.magenta}{{ip}} ${colors.fg.white}with code {{codeCol}} ${colors.fg.white}({{codeNameCol}}${colors.fg.white}) and return file ? ${colors.fg.gray}{{file}}`
-    };
-    private static serv : Server;
-    private static servIO : ServerIO;
+        };
+    private static serv: Server;
+    private static servIO: ServerIO;
+
+    /**
+     * getter for check if the socket system is actif
+     */
+    public static get SocketActif(): boolean {
+        return reqManager.socketActif;
+    }
 
     /**
      * getter for the serv of the application
      * 
      * @returns the serv of the application
      */
-    public static get Server() : ServerIO {
+    public static get Server(): ServerIO {
         return reqManager.servIO;
     }
 
@@ -59,6 +67,19 @@ export class reqManager extends GRequest {
     public static setHelper(value: boolean = true): typeof reqManager {
         this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
         reqManager.helper = value;
+        return reqManager;
+    }
+
+    /**
+     * Activate (or desactivate) the socket system.
+     * You need to activate or desactivate before the init method.
+     * 
+     * @param value True for activate the socket system, false for desactivate it.
+     * @returns reqManager for chaining call.
+     */
+    public static setSocket(value: boolean = true): typeof reqManager {
+        this.port = env.API_PORT ? parseInt(env.API_PORT) : 3000;
+        reqManager.socketActif = value;
         return reqManager;
     }
 
@@ -183,9 +204,9 @@ export class reqManager extends GRequest {
             if (typeof reqManager.requests[i].authLevel === "string" && reqManager.authsFuncs[reqManager.requests[i].authLevel as string] === undefined) {
                 throw new Error("Auth level of " + reqManager.requests[i].authLevel + " not found");
             }
-            if (!reqManager.requests[i].start()) {
-                throw new Error("Request " + reqManager.requests[i].link + " failed to start");
-            }
+
+            reqManager.requests[i].Actif = reqManager.requests[i].start();
+
             if (reqManager.feedback.start !== undefined) {
                 debug.log(
                     reqManager.feedback.start
@@ -199,7 +220,7 @@ export class reqManager extends GRequest {
         }
 
         for (let i = 0; i < reqManager.requests.length; i++) {
-            if (reqManager.requests[i].type === requ.type.PRIVATE) continue;
+            if (reqManager.requests[i].type === requ.type.PRIVATE || !reqManager.requests[i].Actif) continue;
 
             reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link, (requ: req, resu: res) => {
                 try {
@@ -226,6 +247,29 @@ export class reqManager extends GRequest {
                 });
             }
         }
+
+        reqManager.expressApp.get("/favicon.ico", async (req: req, resu: res) => {
+            let Img = img.getImg('favicon', { ext: 'ico' })
+            if (Img !== undefined && Img[0].link.split(" ").length === 1) {
+                if (reqManager.feedback.run !== undefined) {
+                    debug.log(
+                        reqManager.feedback.run
+                            .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + req.path)
+                            .replaceAll("{{link}}", req.path)
+                            .replaceAll("{{callType}}", 'get')
+                            .replaceAll("{{code}}", '200')
+                            .replaceAll("{{codeName}}", requ.httpCodes.codeToName(200))
+                            .replaceAll("{{codeCol}}", colors.fg.green + '200')
+                            .replaceAll("{{codeNameCol}}", colors.fg.green + requ.httpCodes.codeToName(200))
+                            .replaceAll("{{file}}", 'true')
+                            .replaceAll("{{ip}}", req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown ip')
+                    );
+                }
+                resu.status(requ.httpCodes._200_Success._200_OK).sendFile(Img[0].path, { root: __dirname + '/' + '../'.repeat(6) });
+                return;
+            }
+            resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found");
+        })
 
         reqManager.expressApp.get("/img/:type/*", async (req: req, resu: res) => {
             const t = req.params.type;
@@ -546,7 +590,7 @@ export class reqManager extends GRequest {
             body = undefined;
         }
 
-        const reqForAuth = { template : json.clone(template), body : json.clone(body), header, linkVar : json.clone(linkVar), query : json.clone(query), files: undefined } as requ.requestContent;
+        const reqForAuth = { template: json.clone(template), body: json.clone(body), header, linkVar: json.clone(linkVar), query: json.clone(query), files: undefined } as requ.requestContent;
 
         if (!forceAuth) {
             if (cmd.authLevel === false || (typeof cmd.authLevel === "string" && !(await reqManager.authsFuncs[cmd.authLevel](reqForAuth)))) {
