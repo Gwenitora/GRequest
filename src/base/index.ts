@@ -207,7 +207,7 @@ export class reqManager extends GRequest {
 
             reqManager.requests[i].Actif = reqManager.requests[i].start();
 
-            if (reqManager.feedback.start !== undefined) {
+            if (reqManager.requests[i].Actif && reqManager.feedback.start !== undefined) {
                 debug.log(
                     reqManager.feedback.start
                         .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + reqManager.requests[i].link)
