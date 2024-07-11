@@ -125,7 +125,7 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static sendToChannel(channel: string, id: string, ...args: json.type[]) : typeof SocketIO {
-        if (!SocketIO.channels[channel] || args.length === 0) {
+        if (!SocketIO.channels[channel]) {
             return SocketIO;
         }
         for (let i = 0; i < SocketIO.channels[channel].length; i++) {
@@ -144,7 +144,7 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static sendToChannelExcept(channel: string, id: string, exceptSockets: sockets[], ...args: json.type[]) : typeof SocketIO {
-        if (!SocketIO.channels[channel] || args.length === 0) {
+        if (!SocketIO.channels[channel]) {
             return SocketIO;
         }
         for (let i = 0; i < SocketIO.channels[channel].length; i++) {
@@ -162,9 +162,6 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static sendToAll(id: string, ...args: json.type[]) : typeof SocketIO {
-        if (args.length === 0) {
-            return SocketIO;
-        }
         for (let i = 0; i < SocketIO.allSockets.length; i++) {
             SocketIO.allSockets[i].emit(id, ...args);
         }
@@ -180,9 +177,6 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static sendToSocket(socket: sockets, id: string, ...args: json.type[]) : typeof SocketIO {
-        if (args.length === 0) {
-            return SocketIO;
-        }
         socket.emit(id, ...args);
         return SocketIO;
     }
