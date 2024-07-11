@@ -135,6 +135,26 @@ export class SocketIO extends GRequest {
     }
 
     /**
+     * Send a message to a channel, except some sockets
+     * 
+     * @param channel The channel to send the message
+     * @param id The id of the event message
+     * @param exceptSockets All socket to except on the send
+     * @param args Datas to send
+     * @returns The SocketIO server to chain the methods
+     */
+    public static sendToChannelExcept(channel: string, id: string, exceptSockets: sockets[], ...args: json.type[]) : typeof SocketIO {
+        if (!SocketIO.channels[channel] || args.length === 0) {
+            return SocketIO;
+        }
+        for (let i = 0; i < SocketIO.channels[channel].length; i++) {
+            if (exceptSockets.includes(SocketIO.channels[channel][i])) continue;
+            SocketIO.channels[channel][i].emit(id, ...args);
+        }
+        return SocketIO;
+    }
+
+    /**
      * Send a message to all clients
      * 
      * @param id The id of the event message
@@ -205,8 +225,10 @@ export class SocketIO extends GRequest {
         socket.onAny((id, ...args) => {
             const chans = SocketIO.getChannelsOfSocket(socket);
             if (chans.length === 0) return;
+            var excepts = [socket]
             for (let i = 0; i < chans.length; i++) {
-                SocketIO.sendToChannel(chans[i], id, ...args);
+                SocketIO.sendToChannelExcept(chans[i], id, excepts, ...args);
+                excepts.push(...SocketIO.channels[chans[i]]);
             }
         });
         SocketIO.allSockets.push(socket);
