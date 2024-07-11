@@ -217,6 +217,7 @@ export class SocketIO extends GRequest {
             SocketIO.disconnections(socket);
         });
         socket.onAny((id, ...args) => {
+            if (id.startsWith('self')) return;
             const chans = SocketIO.getChannelsOfSocket(socket);
             if (chans.length === 0) return;
             var excepts = [socket]
