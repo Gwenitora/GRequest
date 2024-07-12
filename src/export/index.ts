@@ -563,7 +563,11 @@ export namespace requ {
         /**
          * If you have files in your request, you can get them here.
          */
-        files: fileArrayWithSharp
+        files: fileArrayWithSharp,
+        /**
+         * The cookies of the request.
+         */
+        cookies: json.objPersoType<string>
     }
 
     /**

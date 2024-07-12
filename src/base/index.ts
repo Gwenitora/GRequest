@@ -10,6 +10,7 @@ import sharp from "sharp";
 import cors from "cors";
 import { createServer, Server } from "http";
 import { Server as ServerIO } from "socket.io";
+import cookieParser from "cookie-parser";
 
 /**
  * For start, setup and manage Requests.
@@ -199,6 +200,7 @@ export class reqManager extends GRequest {
         this.expressApp.use(express.json());
         this.expressApp.use(fileUpload());
         this.expressApp.use(cors());
+        this.expressApp.use(cookieParser());
 
         for (let i = 0; i < reqManager.requests.length; i++) {
             if (typeof reqManager.requests[i].authLevel === "string" && reqManager.authsFuncs[reqManager.requests[i].authLevel as string] === undefined) {
@@ -459,6 +461,7 @@ export class reqManager extends GRequest {
         let body = req.body;
         let linkVar = req.params as json.objPersoType<string>;
         let query = req.query as json.objPersoType<string>;
+        let cookies = req.cookies as json.objPersoType<string>;
 
         var files: requ.fileArrayWithSharp = req.files as requ.fileArrayWithSharp;
 
@@ -500,7 +503,7 @@ export class reqManager extends GRequest {
 
         files = newFiles;
 
-        reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query, files }).then((result) => {
+        reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query, files, cookies }).then((result) => {
             resu.status(result.resCode);
             if (result.hasOwnProperty("resFile")) {
                 try {
@@ -545,13 +548,15 @@ export class reqManager extends GRequest {
         header?: undefined,
         linkVar?: typeExt<json.type, json.objPersoType<string>>,
         query?: typeExt<json.type, json.objPersoType<string>>,
-        files?: requ.fileArrayWithSharp
+        files?: requ.fileArrayWithSharp,
+        cookies?: json.objPersoType<string>
     } : {
         body?: json.type,
         header?: typeExt<json.type, json.objPersoType<string>>,
         linkVar?: typeExt<json.type, json.objPersoType<string>>,
         query?: typeExt<json.type, json.objPersoType<string>>,
-        files?: requ.fileArrayWithSharp
+        files?: requ.fileArrayWithSharp,
+        cookies?: json.objPersoType<string>
     }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all } | { resFile: string, resCode: requ.httpCodes.all }> {
         let finded = false;
         let posJ = -1;
@@ -572,12 +577,14 @@ export class reqManager extends GRequest {
         let linkVar = options.linkVar;
         let query = options.query;
         let files = options.files;
+        let cookies = options.cookies;
         let template = -1;
         if (header === undefined) header = {};
         if (body === undefined) body = {};
         if (linkVar === undefined) linkVar = {};
         if (query === undefined) query = {};
         if (files === undefined) files = {};
+        if (cookies === undefined) cookies = {};
 
         for (let i = 0; i < cmd.inTemplates.length; i++) {
             if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
@@ -607,7 +614,7 @@ export class reqManager extends GRequest {
         }
 
         try {
-            const result = await cmd.run({ template, body, header, linkVar, query, files });
+            const result = await cmd.run({ template, body, header, linkVar, query, files, cookies });
             if (result.hasOwnProperty("resFile")) {
                 readFileSync((result as any).resFile, "utf-8");
                 return result;
