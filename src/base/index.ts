@@ -462,6 +462,7 @@ export class reqManager extends GRequest {
         let linkVar = req.params as json.objPersoType<string>;
         let query = req.query as json.objPersoType<string>;
         let cookies = req.cookies as json.objPersoType<string>;
+        let link = req.path;
 
         var files: requ.fileArrayWithSharp = req.files as requ.fileArrayWithSharp;
 
@@ -503,7 +504,7 @@ export class reqManager extends GRequest {
 
         files = newFiles;
 
-        reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query, files, cookies }).then((result) => {
+        reqManager.executeDirect(cmd.link, cmd.callType, false, { body, header, linkVar, query, files, cookies, link }).then((result) => {
             resu.status(result.resCode);
             if (result.hasOwnProperty("resFile")) {
                 try {
@@ -537,31 +538,33 @@ export class reqManager extends GRequest {
     /**
      * Execute a command as local, it's also the only possibilities to execute a `PRIVATE` command.
      * 
-     * @param link The string you have entered in the `link` property of the request.
+     * @param lnk The string you have entered in the `link` property of the request.
      * @param callType If you want to use the `GET`, `POST`, `PUT`, `PATCH` or `DELETE` method.
      * @param forceAuth To access force access, if is false and command need authorisation, you need to send the header with a valid connection for this request.
      * @param options All possible options for the request. Please forgot no one, thanks
      * @returns A promise with the response body and the response code.
      */
-    public static async executeDirect<T extends boolean>(link: string, callType: requ.callType, forceAuth: T, options: T extends true ? {
+    public static async executeDirect<T extends boolean>(lnk: string, callType: requ.callType, forceAuth: T, options: T extends true ? {
         body?: json.type,
         header?: undefined,
         linkVar?: typeExt<json.type, json.objPersoType<string>>,
         query?: typeExt<json.type, json.objPersoType<string>>,
         files?: requ.fileArrayWithSharp,
-        cookies?: json.objPersoType<string>
+        cookies?: json.objPersoType<string>,
+        link?: string;
     } : {
         body?: json.type,
         header?: typeExt<json.type, json.objPersoType<string>>,
         linkVar?: typeExt<json.type, json.objPersoType<string>>,
         query?: typeExt<json.type, json.objPersoType<string>>,
         files?: requ.fileArrayWithSharp,
-        cookies?: json.objPersoType<string>
+        cookies?: json.objPersoType<string>,
+        link?: string;
     }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all } | { resFile: string, resCode: requ.httpCodes.all }> {
         let finded = false;
         let posJ = -1;
         for (var i = 0; i < reqManager.requests.length; i++) {
-            if (reqManager.requests[i].callType === callType && reqManager.requests[i].link === link) {
+            if (reqManager.requests[i].callType === callType && reqManager.requests[i].link === lnk) {
                 finded = true;
                 posJ = i;
                 break;
@@ -578,6 +581,7 @@ export class reqManager extends GRequest {
         let query = options.query;
         let files = options.files;
         let cookies = options.cookies;
+        let link = options.link;
         let template = -1;
         if (header === undefined) header = {};
         if (body === undefined) body = {};
@@ -585,6 +589,7 @@ export class reqManager extends GRequest {
         if (query === undefined) query = {};
         if (files === undefined) files = {};
         if (cookies === undefined) cookies = {};
+        if (link === undefined) link = "";
 
         for (let i = 0; i < cmd.inTemplates.length; i++) {
             if (json.IsRespectTemplate(body, cmd.inTemplates[i], true) === null) continue;
@@ -614,7 +619,7 @@ export class reqManager extends GRequest {
         }
 
         try {
-            const result = await cmd.run({ template, body, header, linkVar, query, files, cookies });
+            const result = await cmd.run({ template, body, header, linkVar, query, files, cookies, link });
             if (result.hasOwnProperty("resFile")) {
                 readFileSync((result as any).resFile, "utf-8");
                 return result;

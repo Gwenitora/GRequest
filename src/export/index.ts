@@ -567,7 +567,11 @@ export namespace requ {
         /**
          * The cookies of the request.
          */
-        cookies: json.objPersoType<string>
+        cookies: json.objPersoType<string>,
+        /**
+         * The precise link of the request.
+         */
+        link: string
     }
 
     /**
