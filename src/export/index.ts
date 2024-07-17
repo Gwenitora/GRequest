@@ -573,6 +573,24 @@ export namespace requ {
          */
         link: string
     }
+    export type responseContent = {
+        /**
+         * The body of the request (respect strictly a template of `inTemplates`).
+         */
+        body: json.type;
+        /**
+         * The header of the request.
+         */
+        header: typeExt<json.type, json.objPersoType<string>>;
+        /**
+         * The precise link of the request.
+         */
+        link: string;
+        /**
+         * Wich http code is the response
+         */
+        status: httpCodes.all;
+    };
 
     /**
      * The response of a request
