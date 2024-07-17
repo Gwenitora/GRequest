@@ -1,15 +1,16 @@
 {
   "name": "@gscript/grequest",
-  "version": "1.1.85",
+  "version": "1.1.86",
   "description": "For easier request system",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "scripts": {
-    "prepublish": "npm run tsc",
+    "prepublish": "npm run tsc && npm run min",
     "push": "npm run prepublish && git push && git push --tags && npm publish --access public && npm i @gscript/grequest",
     "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
     "tsc-w": "tsc -p tsconfig.json -w",
-    "tsc-w-cjs": "tsc -p tsconfig-cjs.json -w"
+    "tsc-w-cjs": "tsc -p tsconfig-cjs.json -w",
+    "min": "npx minify-all-js lib -m -p -j"
   },
   "repository": {
     "type": "git",
@@ -22,9 +23,10 @@
   },
   "homepage": "https://github.com/Gwenitora/GRequest#readme",
   "devDependencies": {
-    "@gscript/grequest": "^1.1.85",
+    "@gscript/grequest": "^1.1.86",
     "@gscript/gscript": "^1.1.1",
     "fs": "^0.0.1-security",
+    "minify-all-js": "^0.1.9",
     "node": "^22.2.0",
     "sharp": "^0.33.4",
     "typescript": "^5.4.5"
