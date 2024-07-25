@@ -234,7 +234,7 @@ export class reqManager extends GRequest {
         }
 
         for (let i = 0; i < reqManager.requests.length; i++) {
-            if (reqManager.requests[i].type === requ.type.PRIVATE || !reqManager.requests[i].Actif) continue;
+            if (reqManager.requests[i].type === requ.type.PRIVATE || !reqManager.requests[i].Actif || reqManager.requests[i].link === undefined) continue;
 
             reqManager.expressApp[reqManager.requests[i].callType](reqManager.prefix + (reqManager.requests[i].version >= 0 ? '/v' + parseInt(reqManager.requests[i].version.toString()).toString() : '') + reqManager.requests[i].link, (requ: req, resu: res) => {
                 try {
