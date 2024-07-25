@@ -1,7 +1,8 @@
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { GRequest } from '../GRequest';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { json } from '@gscript/gtools';
+import { reqManager } from '@gscript/grequest';
 
 export type sockets = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
 
@@ -9,23 +10,11 @@ export type sockets = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMa
  * Class SocketIO for send datas to the clients, or to create funnel between clients
  */
 export class SocketIO extends GRequest {
-    private static io: Server;
     private static connection: ((socket: sockets) => void)[] = [];
     private static disconnection: ((socket: sockets) => void)[] = [];
     private static started: boolean = false;
-    private static allSockets: sockets[];
+    private static allSockets: sockets[] = [];
     private static channels: json.objPersoType<sockets[]> = {};
-
-    /**
-     * Initialize the SocketIO server
-     * 
-     * @returns The SocketIO server to chain the methods
-     */
-    public static init() : typeof SocketIO {
-        if (SocketIO.started) return SocketIO;
-        SocketIO.io = new Server();
-        return SocketIO
-    }
 
     /**
      * Start the sockets readers
@@ -33,10 +22,10 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static start(): typeof SocketIO {
+        const serv = reqManager.Server;
         if (SocketIO.started) return SocketIO;
         SocketIO.started = true;
-        SocketIO.io.listen(3000);
-        SocketIO.io.on('connection', SocketIO.connections);
+        serv.on('connection', SocketIO.connections);
         return SocketIO
     }
 
@@ -136,10 +125,30 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static sendToChannel(channel: string, id: string, ...args: json.type[]) : typeof SocketIO {
-        if (!SocketIO.channels[channel] || args.length === 0) {
+        if (!SocketIO.channels[channel]) {
             return SocketIO;
         }
         for (let i = 0; i < SocketIO.channels[channel].length; i++) {
+            SocketIO.channels[channel][i].emit(id, ...args);
+        }
+        return SocketIO;
+    }
+
+    /**
+     * Send a message to a channel, except some sockets
+     * 
+     * @param channel The channel to send the message
+     * @param id The id of the event message
+     * @param exceptSockets All socket to except on the send
+     * @param args Datas to send
+     * @returns The SocketIO server to chain the methods
+     */
+    public static sendToChannelExcept(channel: string, id: string, exceptSockets: sockets[], ...args: json.type[]) : typeof SocketIO {
+        if (!SocketIO.channels[channel]) {
+            return SocketIO;
+        }
+        for (let i = 0; i < SocketIO.channels[channel].length; i++) {
+            if (exceptSockets.includes(SocketIO.channels[channel][i])) continue;
             SocketIO.channels[channel][i].emit(id, ...args);
         }
         return SocketIO;
@@ -153,9 +162,6 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static sendToAll(id: string, ...args: json.type[]) : typeof SocketIO {
-        if (args.length === 0) {
-            return SocketIO;
-        }
         for (let i = 0; i < SocketIO.allSockets.length; i++) {
             SocketIO.allSockets[i].emit(id, ...args);
         }
@@ -171,9 +177,6 @@ export class SocketIO extends GRequest {
      * @returns The SocketIO server to chain the methods
      */
     public static sendToSocket(socket: sockets, id: string, ...args: json.type[]) : typeof SocketIO {
-        if (args.length === 0) {
-            return SocketIO;
-        }
         socket.emit(id, ...args);
         return SocketIO;
     }
@@ -214,10 +217,13 @@ export class SocketIO extends GRequest {
             SocketIO.disconnections(socket);
         });
         socket.onAny((id, ...args) => {
+            if (id.startsWith('self')) return;
             const chans = SocketIO.getChannelsOfSocket(socket);
             if (chans.length === 0) return;
+            var excepts = [socket]
             for (let i = 0; i < chans.length; i++) {
-                SocketIO.sendToChannel(chans[i], id, ...args);
+                SocketIO.sendToChannelExcept(chans[i], id, excepts, ...args);
+                excepts.push(...SocketIO.channels[chans[i]]);
             }
         });
         SocketIO.allSockets.push(socket);

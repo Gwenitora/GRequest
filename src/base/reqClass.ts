@@ -35,6 +35,14 @@ export abstract class Request extends GRequest  {
      */
     abstract authLevel: string | boolean;
     /**
+     * If you want to use images in your request, you can define the images here.
+     * 
+     * true if is needed.
+     * false if facultative.
+     * others is destroyed.
+     */
+    abstract inImgs: json.objPersoType<boolean>;
+    /**
      * Templates of the request.
      * You can make multiple templates for the request.
      * The id of template is the index in the array, this id is send to you when a request is execute.
@@ -72,4 +80,20 @@ export abstract class Request extends GRequest  {
      * @returns The response of the request, with the body response and the status code.
      */
     abstract run(datas: requ.requestContent): Promise<requ.requestResponse>;
+
+    private actif: boolean = false;
+
+    /**
+     * is active ?
+     */
+    public get Actif(): boolean {
+        return this.actif;
+    }
+
+    /**
+     * Set the active state of the request.
+     */
+    public set Actif(actif: boolean) {
+        this.actif = actif;
+    }
 }
