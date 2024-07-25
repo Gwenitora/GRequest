@@ -18,6 +18,7 @@ export class reqManager extends GRequest {
     private static port: number;
     private static helper: boolean = false;
     private static langActive: boolean = false;
+    private static prefix: string = "";
 
     /**
      * getter for express app
@@ -98,6 +99,17 @@ export class reqManager extends GRequest {
     }
 
     /**
+     * Set the prefix of the api.
+     * 
+     * @param prefix The prefix of the api.
+     * @returns reqManager for chaining call.
+     */
+    public static setPrefix(prefix: string = ''): typeof reqManager {
+        reqManager.prefix = prefix;
+        return reqManager;
+    }
+
+    /**
      * To setup all detect requests (execute the start method of all requests, and save it all of them).
      * All requests detected is all classes that extends the `Request` class.
      * 
@@ -121,14 +133,14 @@ export class reqManager extends GRequest {
         for (let i = 0; i < reqManager.requests.length; i++) {
             if (reqManager.requests[i].type === requ.type.PRIVATE) continue;
 
-            reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link, (requ: req, resu: res) => {
+            reqManager.expressApp[reqManager.requests[i].callType](reqManager.prefix + (reqManager.requests[i].version >= 0 ? '/v' + parseInt(reqManager.requests[i].version.toString()).toString() : '') + reqManager.requests[i].link, (requ: req, resu: res) => {
                 reqManager.execute(reqManager.requests[i], requ, resu);
             });
 
             if (reqManager.requests[i].secret === true || (reqManager.requests[i].secret as { command: boolean }).command === false || (reqManager.requests[i].secret as { helper: boolean }).helper === true) continue;
 
             if (reqManager.helper) {
-                reqManager.expressApp[reqManager.requests[i].callType](reqManager.requests[i].link + "/help", (req: req, resu: res) => {
+                reqManager.expressApp[reqManager.requests[i].callType](reqManager.prefix + (reqManager.requests[i].version >= 0 ? '/v' + parseInt(reqManager.requests[i].version.toString()).toString() : '') + reqManager.requests[i].link + "/help", (req: req, resu: res) => {
                     let help = {
                         link: reqManager.requests[i].link,
                         type: reqManager.requests[i].type,
@@ -142,7 +154,7 @@ export class reqManager extends GRequest {
             }
         }
 
-        reqManager.expressApp.get("/img/:type/*", async (req: req, resu: res) => {
+        reqManager.expressApp.get(reqManager.prefix + "/img/:type/*", async (req: req, resu: res) => {
             const t = req.params.type;
             var T = req.params.type === "png" || req.params.type === "jpg" || req.params.type === "jpeg" || req.params.type === "webp" ? req.params.type : "auto";
             const TT = img.getExts().find((ext) => ext === T);
@@ -180,7 +192,7 @@ export class reqManager extends GRequest {
             resu.status(requ.httpCodes._400_ClientError._404_NotFound).json("Command not found").send();
         });
 
-        reqManager.expressApp.get("/lang/:id", (req: req, resu: res) => {
+        reqManager.expressApp.get(reqManager.prefix + "/lang/:id", (req: req, resu: res) => {
             if (!this.langActive) return;
             const id = req.params.id;
             let lang: json.type;

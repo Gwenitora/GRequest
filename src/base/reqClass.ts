@@ -55,6 +55,12 @@ export abstract class Request extends GRequest  {
     abstract secret : boolean | { command?: true, helper: false } | { command: true, helper?: false } | { command?: false, helper: true } | { command: false, helper?: true };
 
     /**
+     * Version of the request.
+     * If you define this parameter, the version (in int) is ad after the prefix of the link.
+     */
+    public version: number = -1;
+
+    /**
      * Start function of the request.
      * This function is call when the manager is init.
      */
