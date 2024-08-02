@@ -85,6 +85,7 @@ export class reqManager extends GRequest {
             if (cmd.path.split('node_modules').length > 1) continue;
             var jsonCmd = {
                 name: (allCommands.filter((e) => e.path === cmd.path).length > 1 ? cmd.class.name : cmd.path.split("/")[cmd.path.split("/").length - 1]),
+                description: cmd.class.description,
                 request: {
                     method: cmd.class.callType.toUpperCase(),
                     header: globalHeader.map((e) => {
