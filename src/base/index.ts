@@ -28,7 +28,7 @@ export class reqManager extends GRequest {
         start?: string,
         run?: string
     } = {
-            start: `${colors.fg.cyan}Command started: ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}}`,
+            start: `${colors.fg.cyan}Command started: ${colors.fg.yellow}{{callType}} ${colors.fg.gray}{{name}} ${colors.fg.blue}{{link}}`,
             run: `${colors.fg.white}Command ${colors.fg.yellow}{{callType}} ${colors.fg.blue}{{link}} ${colors.fg.white}executed by ${colors.fg.magenta}{{ip}} ${colors.fg.white}with code {{codeCol}} ${colors.fg.white}({{codeNameCol}}${colors.fg.white}) and return file ? ${colors.fg.gray}{{file}}`
         };
     private static serv: Server;
@@ -243,6 +243,7 @@ export class reqManager extends GRequest {
      * - `{{type}}` for the type of the request (public or private).
      * - `{{callType}}` for the call type of the request (GET, POST, PUT, PATCH or DELETE).
      * - `{{authLevel}}` for the auth level of the request.
+     * - `{{name}}` for the name of the request.
      * 
      * @param feedback The message to display when a request is started.
      * @returns reqManager for chaining call.
@@ -310,8 +311,9 @@ export class reqManager extends GRequest {
                         .replaceAll("{{fullLink}}", (env.API_DOMAIN ? env.API_DOMAIN : "http://localhost") + ':' + reqManager.port + reqManager.requests[i].link)
                         .replaceAll("{{link}}", reqManager.requests[i].link)
                         .replaceAll("{{type}}", reqManager.requests[i].type)
-                        .replaceAll("{{callType}}", reqManager.requests[i].callType)
+                        .replaceAll("{{callType}}", reqManager.requests[i].callType + ' '.repeat(6 - reqManager.requests[i].callType.length))
                         .replaceAll("{{authLevel}}", typeof reqManager.requests[i].authLevel === 'boolean' ? (reqManager.requests[i].authLevel ? 'true' : 'false') : reqManager.requests[i].authLevel as string)
+                        .replaceAll("{{name}}", reqManager.requests[i].name)
                 );
             }
         }
