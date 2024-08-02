@@ -2,6 +2,8 @@ import { reqManager, requ, Request } from "@gscript/grequest";
 import { json } from "@gscript/gtools";
 
 export class ReqScriptSocketIo extends Request {
+    name: string = "Socket.io";
+    description: string = "Get the client script of socket.io (for web client)";
     link: string = "/socketio/:file";
     type: requ.type = requ.type.PUBLIC;
     callType: requ.callType = requ.callType.GET;
