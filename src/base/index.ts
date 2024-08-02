@@ -77,8 +77,25 @@ export class reqManager extends GRequest {
                 name: name,
                 schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
             },
+            auth: globalHeader?.length === 0 ? undefined : {
+                type: "apikey",
+                apikey: [
+                    {
+                        key: "key",
+                        value: globalHeader[0].key,
+                        type: "string"
+                    },
+                    {
+                        key: "value",
+                        value: globalHeader[0].value,
+                        type: "string"
+                    }
+                ]
+            },
             item: []
         }
+
+        if (globalHeader?.length !== 0) globalHeader = globalHeader.splice(1, globalHeader.length - 1);
 
         for (const i in allCommands) {
             const cmd = allCommands[i];
