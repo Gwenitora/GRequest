@@ -82,6 +82,7 @@ export class reqManager extends GRequest {
 
         for (const i in allCommands) {
             const cmd = allCommands[i];
+            if (cmd.path.split('node_modules').length > 1) continue;
             var jsonCmd = {
                 name: (allCommands.filter((e) => e.path === cmd.path).length > 1 ? cmd.class.constructor.name : cmd.path.split("/")[cmd.path.split("/").length - 1]),
                 request: {
@@ -105,7 +106,7 @@ export class reqManager extends GRequest {
                     },
                     body: cmd.class.inTemplates.length > 0 ? {
                         mode: "raw",
-                        raw: JSON.stringify(cmd.class.inTemplates[0]),
+                        raw: json.stringify(json.TemplateToClassicExample(cmd.class.inTemplates[0])),
                         options: {
                             raw: {
                                 language: 'json'
@@ -119,7 +120,9 @@ export class reqManager extends GRequest {
             type way = { name: string, item: way }[];
             var way = postMan.item as way;
 
-            for (const p in (cmd.path.split("/").splice(1, cmd.path.split("/").length - 1 - (allCommands.filter((e) => e.path === cmd.path).length > 1 ? 0 : 1)))) {
+            const v = (cmd.path.split("/").splice(1, cmd.path.split("/").length - 1 - (allCommands.filter((e) => e.path === cmd.path).length > 1 ? 0 : 1)));
+            for (const i in v) {
+                const p = v[i];
                 if (way.find(e => e.name === p) === undefined) {
                     way.push({ name: p, item: [] });
                 }
@@ -129,8 +132,12 @@ export class reqManager extends GRequest {
             way.push(jsonCmd as any);
         }
 
-        writeFileSync(file, json.stringify(postMan, 0));
+        while (postMan.item.length <= 1 && (postMan.item[0] as any)?.item !== undefined) {
+            postMan.item = (postMan.item[0] as any).item;
+        }
 
+        if (readFileSync(file, 'utf-8') === json.stringify(postMan, 0)) return reqManager;
+        writeFileSync(/*'../../' + */file, json.stringify(postMan, 0), 'utf-8');
         return reqManager;
     };
 
