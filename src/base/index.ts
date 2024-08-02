@@ -4,7 +4,7 @@ import { colors, debug, env, getClasses, img, json, Langs, maths, typeExt } from
 import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
-import { readFileSync, rmSync } from "fs";
+import { readFileSync, rmSync, writeFileSync } from "fs";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
 import cors from "cors";
@@ -58,6 +58,81 @@ export class reqManager extends GRequest {
     public static get app(): express.Application {
         return reqManager.expressApp;
     }
+
+    /**
+     * generator of exportable postman file
+     * 
+     * @param file The path of the file to generate
+     * @param globalHeader The global header of the postman file
+     */
+    public static genPostman(file: string, name: string = "", globalHeader: {
+        key: string,
+        value?: string,
+        description?: string
+    }[] = []): typeof reqManager {
+        const allCommands = getClasses(Request);
+        var postMan = {
+            info: {
+                author: "GScript",
+                name: name,
+                schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+            },
+            item: []
+        }
+
+        for (const i in allCommands) {
+            const cmd = allCommands[i];
+            var jsonCmd = {
+                name: (allCommands.filter((e) => e.path === cmd.path).length > 1 ? cmd.class.constructor.name : cmd.path.split("/")[cmd.path.split("/").length - 1]),
+                request: {
+                    method: cmd.class.callType.toUpperCase(),
+                    header: globalHeader.map((e) => {
+                        (e as any).type = "text";
+                        return e;
+                    }),
+                    url: {
+                        raw: (env.API_PROTOCOL ? env.API_PROTOCOL : 'http') + '://' + (env.API_DOMAIN ? env.API_DOMAIN : 'localhost') + ':' + (env.API_PORT ? env.API_PORT : '3000') + cmd.class.link,
+                        protocol: (env.API_PROTOCOL ? env.API_PROTOCOL : 'http'),
+                        host: [(env.API_DOMAIN ? env.API_DOMAIN : 'localhost')],
+                        port: (env.API_PORT ? env.API_PORT : '3000'),
+                        path: cmd.class.link.split("/").splice(1, cmd.class.link.split("/").length - 1),
+                        variable: cmd.class.link.split("/").splice(1, cmd.class.link.split("/").length - 1).filter((e: any) => e.startsWith(":")).map((e: any) => {
+                            return {
+                                key: e.split("").splice(1, e.split("").length - 1).join(""),
+                                value: ""
+                            }
+                        })
+                    },
+                    body: cmd.class.inTemplates.length > 0 ? {
+                        mode: "raw",
+                        raw: JSON.stringify(cmd.class.inTemplates[0]),
+                        options: {
+                            raw: {
+                                language: 'json'
+                            }
+                        }
+                    } : undefined
+                },
+                response: []
+            }
+
+            type way = { name: string, item: way }[];
+            var way = postMan.item as way;
+
+            for (const p in (cmd.path.split("/").splice(1, cmd.path.split("/").length - 1 - (allCommands.filter((e) => e.path === cmd.path).length > 1 ? 0 : 1)))) {
+                if (way.find(e => e.name === p) === undefined) {
+                    way.push({ name: p, item: [] });
+                }
+                way = way.filter(e => e.name === p)[0].item;
+            }
+
+            way.push(jsonCmd as any);
+        }
+
+        writeFileSync(file, json.stringify(postMan, 0));
+
+        return reqManager;
+    };
 
     /**
      * Create an homonyme of every request to send you many help about the request (just add `/help` at the end of the link).
@@ -208,7 +283,7 @@ export class reqManager extends GRequest {
                 methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
             }
         });
-        reqManager.requests = getClasses(Request);
+        reqManager.requests = getClasses(Request).map((e) => e.class);
         this.expressApp.use(express.json());
         this.expressApp.use(fileUpload());
         this.expressApp.use(cors());
