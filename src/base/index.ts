@@ -84,7 +84,7 @@ export class reqManager extends GRequest {
             const cmd = allCommands[i];
             if (cmd.path.split('node_modules').length > 1) continue;
             var jsonCmd = {
-                name: (allCommands.filter((e) => e.path === cmd.path).length > 1 ? cmd.class.constructor.name : cmd.path.split("/")[cmd.path.split("/").length - 1]),
+                name: (allCommands.filter((e) => e.path === cmd.path).length > 1 ? cmd.class.name : cmd.path.split("/")[cmd.path.split("/").length - 1]),
                 request: {
                     method: cmd.class.callType.toUpperCase(),
                     header: globalHeader.map((e) => {
@@ -332,6 +332,8 @@ export class reqManager extends GRequest {
             if (reqManager.helper) {
                 reqManager.expressApp[reqManager.requests[i].callType](reqManager.prefix + (reqManager.requests[i].version >= 0 ? '/v' + parseInt(reqManager.requests[i].version.toString()).toString() : '') + reqManager.requests[i].link + "/help", (req: req, resu: res) => {
                     let help = {
+                        name: reqManager.requests[i].name,
+                        description: reqManager.requests[i].description,
                         link: reqManager.requests[i].link,
                         type: reqManager.requests[i].type,
                         callType: reqManager.requests[i].callType,

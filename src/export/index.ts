@@ -596,4 +596,9 @@ export namespace requ {
      * The response of a request
      */
     export type requestResponse = {resBody: json.type, resCode: httpCodes.all} | {resFile: string, resCode: httpCodes.all};
+
+    /**
+     * The type of a secret variable
+     */
+    export type SecretVariableType = boolean | { command?: true, helper: false } | { command: true, helper?: false } | { command?: false, helper: true } | { command: false, helper?: true };
 }

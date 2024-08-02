@@ -7,6 +7,16 @@ import { GRequest } from "../GRequest";
  */
 export abstract class Request extends GRequest  {
     /**
+     * Name of the request.
+     * This name is use for the helper, and the documentation.
+     */
+    abstract name : string;
+    /**
+     * Description of the request.
+     * This description is use for the helper, and the documentation.
+     */
+    abstract description : string;
+    /**
      * Link of the request.
      * 
      * @example "/hw"
@@ -60,7 +70,7 @@ export abstract class Request extends GRequest  {
      * 
      * You can also choose to disable the command or the helper, but if one of them is disable, the other is automatically enable, and same for the invert.
      */
-    abstract secret : boolean | { command?: true, helper: false } | { command: true, helper?: false } | { command?: false, helper: true } | { command: false, helper?: true };
+    abstract secret : requ.SecretVariableType;
 
     /**
      * Version of the request.
