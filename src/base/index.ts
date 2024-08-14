@@ -155,7 +155,7 @@ export class reqManager extends GRequest {
         }
 
         if (readFileSync(file, 'utf-8') === json.stringify(postMan, 0)) return reqManager;
-        writeFileSync(/*'../../' + */file, json.stringify(postMan, 0), 'utf-8');
+        writeFileSync('./' + file, json.stringify(postMan, 0), 'utf-8');
         return reqManager;
     };
 
