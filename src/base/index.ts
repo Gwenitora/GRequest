@@ -17,6 +17,7 @@ import cookieParser from "cookie-parser";
  */
 export class reqManager extends GRequest {
     private static requests: Request[] = [];
+    private static sortedRequests: { [key: string]: Request } = {};
     private static authsFuncs: json.objPersoType<(datas: requ.requestContent) => Promise<boolean>> = {};
     private static expressApp: express.Application = express();
     private static port: number;
@@ -316,6 +317,8 @@ export class reqManager extends GRequest {
         this.expressApp.use(cookieParser());
 
         for (let i = 0; i < reqManager.requests.length; i++) {
+            reqManager.sortedRequests[reqManager.requests[i].link] = reqManager.requests[i];
+
             if (typeof reqManager.requests[i].authLevel === "string" && reqManager.authsFuncs[reqManager.requests[i].authLevel as string] === undefined) {
                 throw new Error("Auth level of " + reqManager.requests[i].authLevel + " not found");
             }
@@ -700,19 +703,10 @@ export class reqManager extends GRequest {
         cookies?: json.objPersoType<string>,
         link?: string;
     }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all } | { resFile: string, resCode: requ.httpCodes.all }> {
-        let finded = false;
-        let posJ = -1;
-        for (var i = 0; i < reqManager.requests.length; i++) {
-            if (reqManager.requests[i].callType === callType && reqManager.requests[i].link === lnk) {
-                finded = true;
-                posJ = i;
-                break;
-            }
-        }
-        if (!finded) {
+        if (!reqManager.sortedRequests.hasOwnProperty(lnk)) {
             return { resBody: "Command not found", resCode: requ.httpCodes._400_ClientError._404_NotFound };
         }
-        let cmd: Request = reqManager.requests[posJ];
+        let cmd: Request = reqManager.sortedRequests[lnk];
 
         let header = options.header;
         let body = options.body;
