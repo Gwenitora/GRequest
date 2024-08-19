@@ -709,7 +709,7 @@ export class reqManager extends GRequest {
         cookies?: json.objPersoType<string>,
         link?: string;
     }): Promise<{ resBody: json.type, resCode: requ.httpCodes.all } | { resFile: string, resCode: requ.httpCodes.all }> {
-        if (!reqManager.sortedRequests.hasOwnProperty(lnk)) {
+        if (!reqManager.sortedRequests[callType].hasOwnProperty(lnk)) {
             return { resBody: "Command not found", resCode: requ.httpCodes._400_ClientError._404_NotFound };
         }
         let cmd: Request = reqManager.sortedRequests[callType][lnk];
