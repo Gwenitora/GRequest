@@ -193,7 +193,7 @@ export class reqManager extends GRequest {
             }
         }
         for (let i = 0; i < allCommands.length; i++) {
-            allCommands[i].path = './' + file + '/' + allCommands[i];
+            allCommands[i].path = './' + file + '/' + allCommands[i].path;
             reqManager.genFileDoc(allCommands[i]);
         }
 
@@ -206,7 +206,8 @@ export class reqManager extends GRequest {
     }) {
         file.path = '../'.repeat(0) + file.path.split("/").splice(1, file.path.split("/").length - 1).join("/");
         var path: string[] = file.path.split("/");
-        const name = path[path.length - 1].split(".").splice(0, path[path.length - 1].split(".").length - 1).join(".") + ".md";
+        const nameTs = path[path.length - 1];
+        const name = nameTs.split(".").splice(0, nameTs.split(".").length - 1).join(".") + ".md";
         path = path.splice(0, path.length - 1);
 
         var actualPos = '';
@@ -220,7 +221,7 @@ export class reqManager extends GRequest {
         if (existsSync(actualPos)) {
             appendFileSync(actualPos, reqManager.genFileDocContent(file.class));
         }
-        writeFileSync(actualPos, `# ${name}\n\n` + reqManager.genFileDocContent(file.class));
+        writeFileSync(actualPos, `# ${nameTs}\n\n` + reqManager.genFileDocContent(file.class));
     }
 
     private static genFileDocContent(otherClass: Request): string {
@@ -233,7 +234,9 @@ export class reqManager extends GRequest {
         const response =     otherClass.outTemplates.length === 0 ? '' : `### Réponse\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(e)}\n\`\`\``)}\n\n:::\n\n`;
         const responseCopy = otherClass.outTemplates.length === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``)}\n\n:::\n\n`;
 
-        return title + auth + desc + images + request + requestCopy + response + responseCopy;
+        const text =         title + auth + desc + images + request + requestCopy + response + responseCopy;
+
+        return text.split('').splice(0, text.length - 2).join('');
     }
 
     /**
