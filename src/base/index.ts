@@ -4,7 +4,7 @@ import { colors, debug, env, getClasses, img, json, Langs, maths, typeExt } from
 import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
-import { readFileSync, rmSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
 import cors from "cors";
@@ -70,7 +70,9 @@ export class reqManager extends GRequest {
      * generator of exportable postman file
      * 
      * @param file The path of the file to generate
+     * @param name The name of the postman collection
      * @param globalHeader The global header of the postman file
+     * @returns reqManager for chaining call.
      */
     public static genPostman(file: string, name: string = "", globalHeader: {
         key: string,
@@ -165,6 +167,74 @@ export class reqManager extends GRequest {
         writeFileSync('./' + file, json.stringify(postMan, 0), 'utf-8');
         return reqManager;
     };
+
+    /**
+     * generator of exportable documentation for VitePress files
+     * 
+     * @param file The path of the files to generate (only the source folder)
+     * @returns reqManager for chaining call.
+     */
+    public static genDoc(file: string) {
+        const allCommands = getClasses(Request);
+
+        var continu = true;
+        while (true) {
+            var firstChar = ''
+            for (var i = 0; i < allCommands.length; i++) {
+                if (i === 0) firstChar = allCommands[i].path.split("/")[0];
+                if (allCommands[i].path.split("/")[0] !== firstChar) {
+                    continu = false;
+                    break;
+                }
+            }
+            if (!continu) break;
+            for (var i = 0; i < allCommands.length; i++) {
+                allCommands[i].path = allCommands[i].path.split("/").splice(1, allCommands[i].path.split("/").length - 1).join("/");
+            }
+        }
+        for (let i = 0; i < allCommands.length; i++) {
+            allCommands[i].path = './' + file + '/' + allCommands[i];
+            reqManager.genFileDoc(allCommands[i]);
+        }
+
+        return reqManager;
+    }
+
+    private static genFileDoc(file: {
+        path: string;
+        class: any;
+    }) {
+        file.path = '../'.repeat(0) + file.path.split("/").splice(1, file.path.split("/").length - 1).join("/");
+        var path: string[] = file.path.split("/");
+        const name = path[path.length - 1].split(".").splice(0, path[path.length - 1].split(".").length - 1).join(".") + ".md";
+        path = path.splice(0, path.length - 1);
+
+        var actualPos = '';
+        for (let i = 0; i < path.length; i++) {
+            actualPos += path[i] + '/';
+            if (!existsSync(actualPos)) {
+                mkdirSync(actualPos);
+            }
+        }
+        actualPos += name;
+        if (existsSync(actualPos)) {
+            appendFileSync(actualPos, reqManager.genFileDocContent(file.class));
+        }
+        writeFileSync(actualPos, `# ${name}\n\n` + reqManager.genFileDocContent(file.class));
+    }
+
+    private static genFileDocContent(otherClass: Request): string {
+        const title =        `## \`${otherClass.callType.toUpperCase()}\` ${otherClass.name} \`${otherClass.link}\`\n\n`;
+        const auth =         typeof otherClass.authLevel === 'boolean' ? (otherClass.authLevel ? '' : `:::info\nCommandes actuellement bloquée\n:::\n\n`) : `:::info\nLes droits nécessaire sont: : "${otherClass.authLevel}"\n:::\n\n`;
+        const desc =         `${otherClass.description}${otherClass.description === '' ? '' : '\n\n'}`;
+        const images =       Object.keys(otherClass.inImgs).length > 0 ? `### Images\n\n|name|optionnal|\n|-|:-:|${Object.keys(otherClass.inImgs).map((e, i) => `\n|${e}|${otherClass.inImgs[e] ? 'TRUE' : ''}|`)}\n\n` : '';
+        const request =      otherClass.inTemplates.length  === 0 ? '' : `### Requête\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(e)}\n\`\`\``)}\n\n:::\n\n`;
+        const requestCopy =  otherClass.inTemplates.length  === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``)}\n\n:::\n\n`;
+        const response =     otherClass.outTemplates.length === 0 ? '' : `### Réponse\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(e)}\n\`\`\``)}\n\n:::\n\n`;
+        const responseCopy = otherClass.outTemplates.length === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``)}\n\n:::\n\n`;
+
+        return title + auth + desc + images + request + requestCopy + response + responseCopy;
+    }
 
     /**
      * Create an homonyme of every request to send you many help about the request (just add `/help` at the end of the link).
