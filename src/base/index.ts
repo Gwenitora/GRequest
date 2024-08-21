@@ -234,10 +234,10 @@ export class reqManager extends GRequest {
         const auth =         typeof otherClass.authLevel === 'boolean' ? (otherClass.authLevel ? '' : `:::info\nCommandes actuellement bloquée\n:::\n\n`) : `:::info\nLes droits nécessaire sont: : "${otherClass.authLevel}"\n:::\n\n`;
         const desc =         `${otherClass.description}${otherClass.description === '' ? '' : '\n\n'}`;
         const images =       Object.keys(otherClass.inImgs).length > 0 ? `### Images\n\n|name|optionnal|\n|-|:-:|${Object.keys(otherClass.inImgs).map((e, i) => `\n|${e}|${otherClass.inImgs[e] ? 'TRUE' : ''}|`)}\n\n` : '';
-        const request =      otherClass.inTemplates.length  === 0 ? '' : `### Requête\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(e)}\n\`\`\``)}\n\n:::\n\n`;
-        const requestCopy =  otherClass.inTemplates.length  === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``)}\n\n:::\n\n`;
-        const response =     otherClass.outTemplates.length === 0 ? '' : `### Réponse\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(e)}\n\`\`\``)}\n\n:::\n\n`;
-        const responseCopy = otherClass.outTemplates.length === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``)}\n\n:::\n\n`;
+        const request =      otherClass.inTemplates.length  === 0 ? '' : `### Requête\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(e)}\n\`\`\``).join('')}\n\n:::\n\n`;
+        const requestCopy =  otherClass.inTemplates.length  === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``).join('')}\n\n:::\n\n`;
+        const response =     otherClass.outTemplates.length === 0 ? '' : `### Réponse\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(e)}\n\`\`\``).join('')}\n\n:::\n\n`;
+        const responseCopy = otherClass.outTemplates.length === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``).join('')}\n\n:::\n\n`;
 
         const text =         title + auth + desc + images + request + requestCopy + response + responseCopy;
 
