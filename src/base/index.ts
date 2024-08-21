@@ -4,7 +4,7 @@ import { colors, debug, env, getClasses, img, json, Langs, maths, typeExt } from
 import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
-import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, rmdirSync, rmSync, writeFileSync } from "fs";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
 import cors from "cors";
@@ -175,7 +175,7 @@ export class reqManager extends GRequest {
      * @returns reqManager for chaining call.
      */
     public static genDoc(file: string) {
-        const allCommands = getClasses(Request);
+        const allCommands = getClasses(Request).filter((e) => e.path.split('node_modules/').length === 1);
 
         var continu = true;
         while (true) {
@@ -192,9 +192,13 @@ export class reqManager extends GRequest {
                 allCommands[i].path = allCommands[i].path.split("/").splice(1, allCommands[i].path.split("/").length - 1).join("/");
             }
         }
+        rmdirSync('./' + file, { recursive: true });
+        var lastPaths: string = ''
         for (let i = 0; i < allCommands.length; i++) {
+            const p = allCommands[i].path;
             allCommands[i].path = './' + file + '/' + allCommands[i].path;
-            reqManager.genFileDoc(allCommands[i]);
+            reqManager.genFileDoc(allCommands[i], lastPaths !== p);
+            lastPaths = p;
         }
 
         return reqManager;
@@ -203,25 +207,26 @@ export class reqManager extends GRequest {
     private static genFileDoc(file: {
         path: string;
         class: any;
-    }) {
+    }, title: boolean) {
         file.path = '../'.repeat(0) + file.path.split("/").splice(1, file.path.split("/").length - 1).join("/");
         var path: string[] = file.path.split("/");
         const nameTs = path[path.length - 1];
-        const name = nameTs.split(".").splice(0, nameTs.split(".").length - 1).join(".") + ".md";
         path = path.splice(0, path.length - 1);
 
         var actualPos = '';
         for (let i = 0; i < path.length; i++) {
             actualPos += path[i] + '/';
+            if (i === path.length - 1) break;
             if (!existsSync(actualPos)) {
                 mkdirSync(actualPos);
             }
         }
-        actualPos += name;
+        actualPos  = actualPos.split("").splice(0, actualPos.split("").length - 1).join("") + '.md';
         if (existsSync(actualPos)) {
-            appendFileSync(actualPos, reqManager.genFileDocContent(file.class));
+            appendFileSync(actualPos, (title ? `\n# ${nameTs}\n\n` : '\n') + reqManager.genFileDocContent(file.class));
+            return;
         }
-        writeFileSync(actualPos, `# ${nameTs}\n\n` + reqManager.genFileDocContent(file.class));
+        writeFileSync(actualPos, (title ? `\n# ${nameTs}\n\n` : '\n') + reqManager.genFileDocContent(file.class));
     }
 
     private static genFileDocContent(otherClass: Request): string {
@@ -236,7 +241,7 @@ export class reqManager extends GRequest {
 
         const text =         title + auth + desc + images + request + requestCopy + response + responseCopy;
 
-        return text.split('').splice(0, text.length - 2).join('');
+        return text.split('').splice(0, text.length - 1).join('');
     }
 
     /**
