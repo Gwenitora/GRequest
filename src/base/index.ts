@@ -4,7 +4,7 @@ import { colors, debug, env, getClasses, img, json, Langs, maths, typeExt } from
 import express from 'express'
 import { req, res } from '..'
 import { requ } from "../export";
-import { appendFileSync, existsSync, mkdirSync, readFileSync, rmdirSync, rmSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import fileUpload from "express-fileupload";
 import sharp from "sharp";
 import cors from "cors";
@@ -192,7 +192,7 @@ export class reqManager extends GRequest {
                 allCommands[i].path = allCommands[i].path.split("/").splice(1, allCommands[i].path.split("/").length - 1).join("/");
             }
         }
-        rmdirSync('./' + file, { recursive: true });
+        rmSync('./' + file, { recursive: true });
         var lastPaths: string = ''
         for (let i = 0; i < allCommands.length; i++) {
             const p = allCommands[i].path;
@@ -223,23 +223,21 @@ export class reqManager extends GRequest {
         }
         actualPos  = actualPos.split("").splice(0, actualPos.split("").length - 1).join("") + '.md';
         if (existsSync(actualPos)) {
-            appendFileSync(actualPos, (title ? `\n# ${nameTs}\n\n` : '\n') + reqManager.genFileDocContent(file.class));
+            appendFileSync(actualPos, (title ? `\n# __${nameTs}__\n\n` : '\n') + reqManager.genFileDocContent(file.class));
             return;
         }
-        writeFileSync(actualPos, (title ? `\n# ${nameTs}\n\n` : '\n') + reqManager.genFileDocContent(file.class));
+        writeFileSync(actualPos, (title ? `\n# __${nameTs}__\n\n` : '\n') + reqManager.genFileDocContent(file.class));
     }
 
     private static genFileDocContent(otherClass: Request): string {
-        const title =        `## \`${otherClass.callType.toUpperCase()}\` ${otherClass.name} \`${otherClass.link}\`\n\n`;
-        const auth =         typeof otherClass.authLevel === 'boolean' ? (otherClass.authLevel ? '' : `:::info\nCommandes actuellement bloquée\n:::\n\n`) : `:::info\nLes droits nécessaire sont: : "${otherClass.authLevel}"\n:::\n\n`;
-        const desc =         `${otherClass.description}${otherClass.description === '' ? '' : '\n\n'}`;
-        const images =       Object.keys(otherClass.inImgs).length > 0 ? `### Images\n\n|name|optionnal|\n|-|:-:|${Object.keys(otherClass.inImgs).map((e, i) => `\n|${e}|${otherClass.inImgs[e] ? 'TRUE' : ''}|`)}\n\n` : '';
-        const request =      otherClass.inTemplates.length  === 0 ? '' : `### Requête\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(e)}\n\`\`\``).join('')}\n\n:::\n\n`;
-        const requestCopy =  otherClass.inTemplates.length  === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``).join('')}\n\n:::\n\n`;
-        const response =     otherClass.outTemplates.length === 0 ? '' : `### Réponse\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(e)}\n\`\`\``).join('')}\n\n:::\n\n`;
-        const responseCopy = otherClass.outTemplates.length === 0 ? '' : `#### Copy\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``).join('')}\n\n:::\n\n`;
+        const title =     `## \`${otherClass.callType.toUpperCase()}\` ${otherClass.name} \`${otherClass.link}\`\n\n`;
+        const auth =      typeof otherClass.authLevel === 'boolean' ? (otherClass.authLevel ? '' : `:::info\nCommandes actuellement bloquée\n:::\n\n`) : `:::info\nLes droits nécessaire sont: "${otherClass.authLevel}"\n:::\n\n`;
+        const desc =      `${otherClass.description}${otherClass.description === '' ? '' : '\n\n'}`;
+        const images =    Object.keys(otherClass.inImgs).length > 0 ? `### Images\n\n|name|optionnal|\n|-|:-:|${Object.keys(otherClass.inImgs).map((e, i) => `\n|${e}|${otherClass.inImgs[e] ? 'TRUE' : ''}|`)}\n\n` : '';
+        const request =   otherClass.inTemplates.length  === 0 ? '' : `#### Requête\n\n:::code-group${otherClass.inTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``).join('')}\n\n:::\n\n`;
+        const response =  otherClass.outTemplates.length === 0 ? '' : `#### Réponse\n\n:::code-group${otherClass.outTemplates.map((e, i) => `\n\n\`\`\`json [n°${i + 1}]\n${json.stringify(json.TemplateToClassicExample(e))}\n\`\`\``).join('')}\n\n:::\n\n`;
 
-        const text =         title + auth + desc + images + request + requestCopy + response + responseCopy;
+        const text =      title + auth + desc + images + request + response;
 
         return text.split('').splice(0, text.length - 1).join('');
     }
