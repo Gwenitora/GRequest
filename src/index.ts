@@ -4,6 +4,7 @@ import { reqManager } from './base'
 import { Request as request, Response as response } from 'express'
 import { SocketIO, sockets } from './socket.io'
 import { call, forceCall, callWaitTime } from './call'
+import ical from './ical'
 
 /**
  * The type of a request by `express`.
@@ -26,5 +27,6 @@ export {
     res,
     callWaitTime,
     call,
-    forceCall
+    forceCall,
+    ical
 }
