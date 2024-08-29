@@ -4,7 +4,7 @@ import { reqManager } from './base'
 import { Request as request, Response as response } from 'express'
 import { SocketIO, sockets } from './socket.io'
 import { call, forceCall, callWaitTime } from './call'
-import ical from './ical'
+import ical from '../../GTools/src/ical'
 
 /**
  * The type of a request by `express`.
